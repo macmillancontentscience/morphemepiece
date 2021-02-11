@@ -1,0 +1,26 @@
+Package: MMRtemplate
+Type: Package
+Title: One Line in Sentence Case
+Version: 0.0.0.9000
+Authors@R: c(
+    person("Jon", "Harmon", email = "jon.harmon@macmillan.com", role = c("aut", "cre")),
+    person("Jonathan", "Bratt", email = "jonathan.bratt@macmillan.com", role = "aut")
+    )
+Description: One-paragraph description of what the package does.
+URL: https://github.com/macmillanhighered/MMRtemplate
+BugReports: https://macmillanlearning.atlassian.net/secure/RapidBoard.jspa?rapidView=273&projectKey=MMR
+Depends: R (>= 3.5.2)
+License: file LICENSE
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 6.1.1
+Imports:
+    magrittr (>= 1.5),
+    MMRdb (>= 3.1.0)
+Suggests:
+    testthat,
+    knitr,
+    rmarkdown
+Remotes:
+    macmillanhighered/MMRdb
+VignetteBuilder: knitr
