@@ -1,4 +1,4 @@
 library(testthat)
-library(MMRtemplate)
+library(morphemepiece)
 
-test_check("MMRtemplate")
+test_check("morphemepiece")

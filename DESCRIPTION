@@ -1,26 +1,31 @@
-Package: MMRtemplate
+Package: morphemepiece
 Type: Package
-Title: One Line in Sentence Case
+Title: Morpheme Tokenization
 Version: 0.0.0.9000
 Authors@R: c(
-    person("Jon", "Harmon", email = "jon.harmon@macmillan.com", role = c("aut", "cre")),
-    person("Jonathan", "Bratt", email = "jonathan.bratt@macmillan.com", role = "aut")
+    person(given = "Jonathan",
+           family = "Bratt",
+           role = c("aut", "cre"),
+           email = "jonathan.bratt@macmillan.com",
+           comment = c(ORCID = "0000-0003-2859-0076")),
+    person(given = "Jon",
+           family = "Harmon",
+           role = c("aut"),
+           email = "jonthegeek@gmail.com",
+           comment = c(ORCID = "0000-0003-4781-4346")),
+    person(given = "Bedford Freeman & Worth Pub Grp LLC DBA Macmillan Learning", 
+           role = c("cph"))
     )
-Description: One-paragraph description of what the package does.
-URL: https://github.com/macmillanhighered/MMRtemplate
-BugReports: https://macmillanlearning.atlassian.net/secure/RapidBoard.jspa?rapidView=273&projectKey=MMR
+Description: Tokenize words into morphemes (the smallest unit of meaning).
+URL: https://github.com/macmillancontentscience/morphemepiece
+BugReports: https://github.com/macmillancontentscience/morphemepiece/issues
 Depends: R (>= 3.5.2)
-License: file LICENSE
+License: Apache License (>= 2)
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 6.1.1
-Imports:
-    magrittr (>= 1.5),
-    MMRdb (>= 3.1.0)
+RoxygenNote: 7.1.1
 Suggests:
     testthat,
     knitr,
     rmarkdown
-Remotes:
-    macmillanhighered/MMRdb
 VignetteBuilder: knitr

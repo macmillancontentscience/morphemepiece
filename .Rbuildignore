@@ -1,4 +1,7 @@
-^.+\.Rproj$
+^.*\.Rproj$
 ^\.Rproj\.user$
+^LICENSE\.md$
 ^README\.Rmd$
-^data-raw$
+^CONTRIBUTING\.md$
+^CODE_OF_CONDUCT\.md$
+^\.github$

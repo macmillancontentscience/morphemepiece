@@ -1,25 +1,41 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
-MMRtemplate
-===========
 
-The goal of MMRtemplate is to ... (you should find/replace MMRtemplate throughout this package)
+# morphemepiece
 
-Installation
-------------
+The goal of morphemepiece is to allow you to tokenize words into
+morphemes (the smallest unit of meaning).
 
-You can install MMRtemplate from [GitHub](https://github.com/) with:
+## Installation
+
+You can install the released version of wordpiece from
+[CRAN](https://CRAN.R-project.org) with:
+
+``` r
+# No you can't.
+# install.packages("morphemepiece")
+```
+
+And the development version from [GitHub](https://github.com/) with:
 
 ``` r
 # install.packages("devtools")
-# Set up a GITHUB_PAT with Sys.setenv(GITHUB_PAT = "YOURPATHERE")
-devtools::install_github(
-  "macmillanhighered/MMRtemplate", 
-  build_opts = c("--no-resave-data", "--no-manual")
-)
+devtools::install_github("macmillancontentscience/morphemepiece")
 ```
 
-Example
--------
+## Code of Conduct
 
-This package does not currently contain any functions, other than a re-exported pipe %&gt;%.
+Please note that the wordpiece project is released with a [Contributor
+Code of
+Conduct](https://contributor-covenant.org/version/2/0/CODE_OF_CONDUCT.html).
+By contributing to this project, you agree to abide by its terms.
+
+## Disclaimer
+
+This is not an officially supported Macmillan Learning product.
+
+## Contact information
+
+Questions or comments should be directed to Jonathan Bratt
+(<jonathan.bratt@macmillan.com>) and Jon Harmon
+(<jonthegeek@gmail.com>).

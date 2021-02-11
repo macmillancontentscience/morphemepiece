@@ -1,7 +1,7 @@
-#' MMRtemplate: Copy the Title from DESCRIPTION
+#' morphemepiece: Morpheme Tokenization
 #'
-#' Use the Descriptoin from DESCRIPTION here.
+#' Tokenize words into morphemes (the smallest unit of meaning).
 #'
 #' @docType package
-#' @name MMRtemplate-package
+#' @name morphemepiece-package
 NULL
