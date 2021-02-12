@@ -32,11 +32,31 @@ NULL
 # .pull_out_longest_piece -----------------------------------------------------
 
 
+#' Pull the longest piece out of the given word
+#'
+#' Valid pieces meet the following restrictions: all internal "breaks" have at
+#' least one "##" between, and no external edges have a "##".
+#'
+#' @param word Character; word to break into pieces.
+#' @param mp_vocab_nohash A morphemepiece vocabulary with ## in names only.
+#' @param original_start Logical; is the beginning of this word the beginning of
+#'   the original word?
+#' @param original_end Logical; is the end of this word the end of the original
+#'   word?
+#' @param prefixes List of prefixes from vocab. (I still need to clean this up.)
+#'
+#' @return A list of three "character" elements. The middle piece is the piece
+#' "pulled out" by this function, the first and last are the left and right
+#' remainders, respectively. They may be empty (""). (If an empty word is input,
+#' the output will be simply "". This is an inconsistency which we may want to
+#' deal with.)
+#'
+#' @keywords internal
 .pull_out_longest_piece <- function(word, 
                                     mp_vocab_nohash,
                                     original_start = TRUE,
                                     original_end = TRUE,
-                                    prefixes = prefixes) {
+                                    prefixes) {
     if (word == "") {
         return(word)
     }
@@ -119,6 +139,20 @@ NULL
 
 # .mp_tokenize_word -----------------------------------------------------------
 
+#' Apply Morphemepiece tokenization to word
+#'
+#' Repeatedly pull out the longest valid vocabulary piece from the word until
+#' the whole word is represented in terms of vocabulary pieces. This algorithm
+#' is intended to be used as a "fall-back" for words that are not found in the
+#' morphemepiece lookup table.
+#'
+#' @param word Character; word to tokenize.
+#' @param vocab A morphemepiece vocabulary.
+#'
+#' @return A character vector corresponding to the original word, broken into 
+#' pieces.
+#'
+#' @keywords internal
 .mp_tokenize_word <- function(word, vocab) {
     # handle prefixes a little differently...
     prefixes <- vocab[stringr::str_ends(vocab, "##")]
