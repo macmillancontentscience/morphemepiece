@@ -15,17 +15,8 @@
 
 # pipe for internal use ----------------------------------------
 
-#' Pipe operator
-#'
-#' The pipe function, \code{\%>\%}, allows you to turn function composition into
-#' a series of imperative statements.
-#'
 #' @importFrom magrittr %>%
-#' @name %>%
-#' @rdname pipe
-#' @param lhs,rhs A vector of fields or a tibble of fields and values, and a
-#'   function to apply to them.
-NULL
+magrittr::`%>%`
 
 
 # .pull_out_longest_piece -----------------------------------------------------
