@@ -1,7 +1,7 @@
 Package: morphemepiece
 Type: Package
 Title: Morpheme Tokenization
-Version: 0.0.0.9000
+Version: 0.0.1
 Authors@R: c(
     person(given = "Jonathan",
            family = "Bratt",
@@ -24,6 +24,11 @@ License: Apache License (>= 2)
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.1.1
+Roxygen: list(markdown = TRUE)
+Imports:
+    dplyr (>= 1.0.4),
+    purrr (>= 0.3.4),
+    stringr (>= 1.4.0)
 Suggests:
     testthat,
     knitr,
