@@ -13,7 +13,7 @@
 # limitations under the License.
 
 
-# reexports (maybe keep internal?) ----------------------------------------
+# pipe for internal use ----------------------------------------
 
 #' Pipe operator
 #'
@@ -23,7 +23,6 @@
 #' @importFrom magrittr %>%
 #' @name %>%
 #' @rdname pipe
-#' @export
 #' @param lhs,rhs A vector of fields or a tibble of fields and values, and a
 #'   function to apply to them.
 NULL
@@ -62,17 +61,14 @@ NULL
     }
     
     # deduce whether this is a valid_start from the ##
-    valid_start <- FALSE
-    if (stringr::str_starts(word, pattern = "##", negate = TRUE)) {
-        valid_start <- TRUE
-    }
+    valid_start <- stringr::str_starts(word, pattern = "##", negate = TRUE)
     
     word <- stringr::str_remove_all(word, pattern = "#")
     
     match <- stringr::str_locate(string = word, pattern = mp_vocab_nohash) %>%
         tibble::as_tibble() %>%
         # need an index...
-        dplyr::mutate(which_wp = row_number()) %>%
+        dplyr::mutate(which_wp = dplyr::row_number()) %>%
         # take out any pieces *not* found in word
         dplyr::filter(!is.na(start)) %>%
         # full_token includes the ##
@@ -201,3 +197,46 @@ NULL
     }
     return(current_breakdown)
 }
+
+
+# morphemepiece_tokenize --------------------------------------------------
+
+
+#' Tokenize Sequence with Morpheme Pieces
+#'
+#' Given a single sequence of text and a morphemepiece vocabulary, tokenizes the
+#' text. (This is *not* fully functional yet. It's mainly a placeholder so that
+#' the package exports something.)
+#' 
+#'
+#' @inheritParams .mp_tokenize_word
+#' @param text Character scalar; text to tokenize.
+#'
+#' @return A character vector of tokenized text (later, this should be a named
+#' integer vector, as in the wordpiece package.)
+#' @export
+morphemepiece_tokenize <- function(text,
+                                   vocab) {
+
+    text <- tolower(text)
+
+    # collapse whitespace
+    text <- stringr::str_replace_all(text, pattern = "\\s+", " ")
+    # for placeholder, strip out all non-latin characters
+    text <- stringr::str_remove_all(text, pattern = "[^a-z ]")
+
+    # split on whitespace
+    text <- unlist(stringi::stri_split_regex(text, "\\s", omit_empty = TRUE))
+    # tokenize each piece
+    text <- purrr::map(text, .f = .mp_tokenize_word, vocab = vocab)
+    text <- unlist(text)
+    # eventually want to do something like:
+    # ids <- vocab[text]
+    # names(ids) <- text
+    # return(ids)
+    return(text)
+    #  For testing on datascience:
+    #  mp_vocab <- readRDS("/shared/morphemepiece_vocabs/mp_vocab.rds")
+    #  morphemepiece_tokenize("I love tacos! And prexxxxationings", mp_vocab)
+}
+
