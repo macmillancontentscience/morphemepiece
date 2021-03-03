@@ -29,7 +29,7 @@ The lookup table as a named character vector.
 Load a lookup file, or retrieve from cache
 }
 \examples{
-# Get path to sample vocabulary included with package.
-# vocab_path <- system.file("extdata", "tiny_vocab.txt", package = "wordpiece")
+# Get path to sample file included with package.
+# vocab_path <- system.file("extdata", "file.txt", package = "morphemepiece")
 # vocab <- load_or_retrieve_vocab(vocab_file = vocab_path, use_cache = FALSE)
 }

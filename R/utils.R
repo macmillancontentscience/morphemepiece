@@ -342,7 +342,6 @@
 #'
 #' @param vocab Named integer vector; the "actual" vocabulary.
 #' @param vocab_split List of named integer vectors; the split vocabulary.
-#' @param rev_vocab List of named integer vectors; split + reversed vocabulary.
 #' @param is_cased Logical; whether the vocabulary is cased.
 #' @return The vocabulary with `is_cased` attached as an attribute, and the
 #'   class `morphemepiece_vocabulary` applied. The split and reversed
@@ -351,11 +350,9 @@
 #' @keywords internal
 .new_morphemepiece_vocabulary <- function(vocab, 
                                           vocab_split, 
-                                          rev_vocab, 
                                           is_cased) {
   return(structure(vocab,
                    "vocab_split" = vocab_split,
-                   "rev_vocab" = rev_vocab,
                    "is_cased" = is_cased,
                    class = c("morphemepiece_vocabulary", "integer")))
 }

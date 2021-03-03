@@ -4,13 +4,22 @@
 \alias{.mp_tokenize_word}
 \title{Tokenize a Word}
 \usage{
-.mp_tokenize_word(word, vocab_split, unk_token = "[UNK]", max_chars = 100)
+.mp_tokenize_word(
+  word,
+  vocab_split,
+  dir = 1,
+  unk_token = "[UNK]",
+  max_chars = 100
+)
 }
 \arguments{
 \item{word}{Word to tokenize.}
 
 \item{vocab_split}{List of named integer vector containing vocabulary words.
 Should have components named "prefixes", "words", "suffixes"}
+
+\item{dir}{Integer; if 1 (the default), look for tokens starting at the
+beginning of the word. Otherwise, start at the end.}
 
 \item{unk_token}{Token to represent unknown words.}
 
@@ -21,15 +30,15 @@ Input word as a list of tokens.
 }
 \description{
 Tokenize a single "word" (no whitespace). The word can technically contain
-punctuation, but in BERT's tokenization, punctuation has been split out by
-this point.
+punctuation, but typically punctuation has been split off by this point.
 }
 \details{
-This is an adapdation of wordpiece:::.tokenize_word. The main differences
-are that it was designed to work with a morphemepiece vocabulary, which can
+This is an adapdation of wordpiece:::.tokenize_word. The main differences are
+that it was designed to work with a morphemepiece vocabulary, which can
 include prefixes (denoted like "pre##"). As in wordpiece, the algorithm uses
 a repeated greedy search for the largest piece from the vocabulary found
-within the word, starting from the beginning. The input vocabulary must be
-split into prefixes, suffixes, and "words".
+within the word, but starting from either the beginning or the end of the
+word (controlled by the \code{dir} parameter). The input vocabulary must be split
+into prefixes, suffixes, and "words".
 }
 \keyword{internal}

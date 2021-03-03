@@ -4,14 +4,12 @@
 \alias{.new_morphemepiece_vocabulary}
 \title{Constructor for Class morphemepiece_vocabulary}
 \usage{
-.new_morphemepiece_vocabulary(vocab, vocab_split, rev_vocab, is_cased)
+.new_morphemepiece_vocabulary(vocab, vocab_split, is_cased)
 }
 \arguments{
 \item{vocab}{Named integer vector; the "actual" vocabulary.}
 
 \item{vocab_split}{List of named integer vectors; the split vocabulary.}
-
-\item{rev_vocab}{List of named integer vectors; split + reversed vocabulary.}
 
 \item{is_cased}{Logical; whether the vocabulary is cased.}
 }

@@ -129,19 +129,21 @@ magrittr::`%>%`
 #' Tokenize a Word
 #'
 #' Tokenize a single "word" (no whitespace). The word can technically contain
-#' punctuation, but in BERT's tokenization, punctuation has been split out by
-#' this point.
+#' punctuation, but typically punctuation has been split off by this point.
 #'
-#' This is an adapdation of wordpiece:::.tokenize_word. The main differences
-#' are that it was designed to work with a morphemepiece vocabulary, which can
+#' This is an adapdation of wordpiece:::.tokenize_word. The main differences are
+#' that it was designed to work with a morphemepiece vocabulary, which can
 #' include prefixes (denoted like "pre##"). As in wordpiece, the algorithm uses
 #' a repeated greedy search for the largest piece from the vocabulary found
-#' within the word, starting from the beginning. The input vocabulary must be
-#' split into prefixes, suffixes, and "words".
-#'
+#' within the word, but starting from either the beginning or the end of the
+#' word (controlled by the `dir` parameter). The input vocabulary must be split
+#' into prefixes, suffixes, and "words".
+#' 
 #' @param word Word to tokenize.
 #' @param vocab_split List of named integer vector containing vocabulary words.
-#'  Should have components named "prefixes", "words", "suffixes"
+#'   Should have components named "prefixes", "words", "suffixes"
+#' @param dir Integer; if 1 (the default), look for tokens starting at the
+#'   beginning of the word. Otherwise, start at the end.
 #' @param unk_token Token to represent unknown words.
 #' @param max_chars Maximum length of word recognized.
 #'
@@ -149,64 +151,98 @@ magrittr::`%>%`
 #' @keywords internal
 .mp_tokenize_word <- function(word, 
                               vocab_split, 
+                              dir = 1, # -1 for backwards
                               unk_token = "[UNK]",
                               max_chars = 100) {
-    if (stringi::stri_length(word) > max_chars) {
-        return(unk_token)
-    }
-    frag_pat <- "##"
+  if (stringi::stri_length(word) > max_chars) {
+    return(unk_token)
+  }
+  frag_pat <- "##"
+  
+  prefixes <- vocab_split$prefixes
+  words <- vocab_split$words
+  suffixes <- vocab_split$suffixes
+  
+  is_bad  <- FALSE
+  start <- 1
+  sub_tokens <- character(0)
+  
+  wordlen <- stringi::stri_length(word)
+  end <- wordlen
+  
+  if (dir == 1) {
+    # rules for what kind of token can follow what (prefix, word, suffix)
+    allowed_next_rules <- list("p" = c("p", "w", "s"),
+                               "w" = "s",
+                               "s" = "s")
+    allowed_next <- c("p", "w")
+  } else {
+    # for backwards run
+    allowed_next_rules <- list("s" = c("p", "w", "s"),
+                               "w" = "p",
+                               "p" = "p")
     
-    prefixes <- vocab_split$prefixes
-    words <- vocab_split$words
-    suffixes <- vocab_split$suffixes
-    
-    is_bad  <- FALSE
-    start <- 1
-    sub_tokens <- character(0)
-    
-    wordlen <- stringi::stri_length(word)
-    end <- wordlen
-    bare_ok <- TRUE # is it OK for the next piece to *not* start with ##?
-    
-    while (start <= stringi::stri_length(word)) {
-        end <- stringi::stri_length(word)
-        cur_substr  <- NA_character_
-        while (start <= end) {
-            sub_str <- substr(word, start, end)   # inclusive on both ends
-            
-            # first look for prefixes, if allowed
-            if (bare_ok & end < wordlen & sub_str %in% prefixes) {
-                cur_substr <- paste0(sub_str, frag_pat)
-                break
-            }
-            # next, look for suffix-like pieces, if we're not at start of word
-            if (start > 1 & sub_str %in% suffixes) {
-                cur_substr <- paste0(frag_pat, sub_str)
-                bare_ok <- FALSE
-                break
-            }
-            # finally, look for complete words, if allowed
-            if (bare_ok & sub_str %in% words) {
-                cur_substr <- sub_str
-                bare_ok <- FALSE
-                break
-            }
-            end <- end - 1
-        }
-        
-        if (is.na(cur_substr[[1]]) ) {
-            is_bad <-  TRUE #nocov
-            break           #nocov
-        }
-        
-        sub_tokens <- append(sub_tokens, cur_substr)
-        start <- end + 1 # pick up where we left off
+    allowed_next <- c("s", "w")  
+  }
+  
+  keepgoing <- TRUE
+  while (keepgoing) {
+    if (dir == 1) {
+      end <- wordlen
+    } else {
+      start <- 1
     }
     
-    if (is_bad) {
-        return(unk_token) #nocov
+    cur_substr  <- NA_character_
+    while (start <= end) {
+      sub_str <- substr(word, start, end)   # inclusive on both ends
+      
+      # first look for prefixes, if allowed
+      if ("p" %in% allowed_next & end < wordlen & sub_str %in% prefixes) {
+        cur_substr <- paste0(sub_str, frag_pat)
+        allowed_next <- allowed_next_rules[["p"]]
+        break
+      }
+      # next, look for suffix-like pieces, if we're not at start of word
+      if ("s" %in% allowed_next & start > 1 & sub_str %in% suffixes) {
+        cur_substr <- paste0(frag_pat, sub_str)
+        allowed_next <- allowed_next_rules[["s"]]
+        break
+      }
+      # finally, look for complete words, if allowed
+      if ("w" %in% allowed_next & sub_str %in% words) {
+        cur_substr <- sub_str
+        allowed_next <- allowed_next_rules[["w"]]
+        break
+      }
+      
+      if (dir == 1) {
+        end <- end - 1 # forward; hold start fixed
+      } else {
+        start <- start + 1 # backward; hold end fixed
+      }
     }
-    return(sub_tokens)
+    
+    if (is.na(cur_substr[[1]]) ) {
+      is_bad <-  TRUE #nocov
+      break           #nocov
+    }
+    
+    if (dir == 1) {
+      sub_tokens <- append(sub_tokens, cur_substr) # append to end
+      start <- end + 1 # rest of word, after taking piece off the front
+      keepgoing <- start <= wordlen
+    } else {
+      sub_tokens <- append(cur_substr, sub_tokens) # append to beginning
+      end <- start - 1 # rest of word, after taking piece off the end
+      keepgoing <- end >= 1
+    }
+  }
+  
+  if (is_bad) {
+    return(unk_token) #nocov
+  }
+  return(sub_tokens)
 }
 
 
@@ -219,18 +255,17 @@ magrittr::`%>%`
 #'
 #' @param word Word to tokenize.
 #' @param vocab Named integer vector containing vocabulary words. Should have
-#'   "vocab_split" and "rev_vocab" attributes, with components named "prefixes",
-#'   "words", "suffixes".
+#'   "vocab_split" attribute, with components named "prefixes", "words",
+#'   "suffixes".
 #'
 #' @return Input word as a list of tokens.
 #' @keywords internal
 .mp_tokenize_word_bidir <- function(word, vocab) {
     vocab_split <- attr(vocab, "vocab_split")
-    vocab_split_rev <- attr(vocab, "rev_vocab")
-    t1 <- .mp_tokenize_word(word, vocab_split)
-    t2 <- .mp_tokenize_word(stringi::stri_reverse(word), vocab_split_rev)
+    t1 <- .mp_tokenize_word(word, vocab_split, dir = 1)
+    t2 <- .mp_tokenize_word(word, vocab_split, dir = -1)
     if (length(t2) < length(t1) & length(t2) > 1) {
-        return(stringi::stri_reverse(rev(t2)))
+        return(t2)
     } else {
         return(t1)
     }
@@ -339,16 +374,11 @@ load_vocab <- function(vocab_file) {
     named_vocab <- seq_along(token_list) -1
     names(named_vocab) <- token_list
     
-    # attach processed forms of vocab as attributes to speed up computations.
+    # attach processed form of vocab as attribute to speed up computations.
     vocab_split <- .split_vocab(token_list)
-    # also calculate reversed vocabulary. I will probably refactor code so 
-    # we don't do things this way, but for now, it's simpler.
-    token_list_rev <- stringi::stri_reverse(token_list)
-    rev_vocab <- .split_vocab(token_list_rev)
     is_cased <- .infer_case_from_vocab(token_list) # sure, why not.
     vocab_all <- .new_morphemepiece_vocabulary(named_vocab, 
                                                vocab_split, 
-                                               rev_vocab, 
                                                is_cased)
     return(.validate_morphemepiece_vocabulary(vocab_all))
 }
