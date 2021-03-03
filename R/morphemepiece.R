@@ -378,36 +378,18 @@ load_vocab <- function(vocab_file) {
 #' @export
 #'
 #' @examples
-#' # Get path to sample vocabulary included with package.
-#' # vocab_path <- system.file("extdata", "tiny_vocab.txt", package = "wordpiece")
+#' # Get path to sample file included with package.
+#' # vocab_path <- system.file("extdata", "file.txt", package = "morphemepiece")
 #' # vocab <- load_or_retrieve_vocab(vocab_file = vocab_path, use_cache = FALSE)
 load_or_retrieve_vocab <- function(vocab_file,
                                    use_cache = TRUE,
                                    cache_dir = get_cache_dir()) {
-    # probably should make sure we invalidate the cache across package versions
-    if (use_cache) {
-        cache_filepath <- file.path(cache_dir, .make_cache_filename(vocab_file))
-        if (file.exists(cache_filepath)) {
-            return(readRDS(cache_filepath)) # nocov
-        }
-    }
-    # Guess we have to load the vocab from text file.
-    vocab <- load_vocab(vocab_file)
-    
-    if (use_cache) { # nocov start
-        # ask for permission to write to cache
-        if (interactive()) {
-            if (isTRUE(utils::askYesNo(paste0("Cache vocabulary at ",
-                                              cache_filepath, "?")))) {
-                # make sure that the directory exists
-                if (!dir.exists(cache_dir)) {
-                    dir.create(path = cache_dir, recursive = TRUE)
-                }
-                saveRDS(vocab, cache_filepath)
-            }
-        }
-    } # nocov end
-    return(vocab)
+  return(
+    .load_or_retrieve_file(vocab_file,
+                           load_vocab,
+                           use_cache,
+                           cache_dir)
+  )
 }
 
 # load_lookup --------------------------------------------------------------
@@ -444,7 +426,7 @@ load_lookup <- function(lookup_file) {
 }
 
 
-# load_or_retrieve_lookup  DONT NEED TWO FUNCTIONS ------------------------------------------------------
+# load_or_retrieve_lookup ------------------------------------------------------
 #generalize vocab function to do both
 
 #' Load a lookup file, or retrieve from cache
@@ -461,37 +443,65 @@ load_lookup <- function(lookup_file) {
 #' @export
 #'
 #' @examples
-#' # Get path to sample vocabulary included with package.
-#' # vocab_path <- system.file("extdata", "tiny_vocab.txt", package = "wordpiece")
+#' # Get path to sample file included with package.
+#' # vocab_path <- system.file("extdata", "file.txt", package = "morphemepiece")
 #' # vocab <- load_or_retrieve_vocab(vocab_file = vocab_path, use_cache = FALSE)
 load_or_retrieve_lookup <- function(lookup_file,
                                     use_cache = TRUE,
                                     cache_dir = get_cache_dir()) {
-    # stop("not implemented yet")
-    if (use_cache) {
-        cache_filepath <- file.path(cache_dir, 
-                                    .make_cache_filename(lookup_file))
-        if (file.exists(cache_filepath)) {
-            return(readRDS(cache_filepath)) # nocov
-        }
-    }
-    # Guess we have to load the lookup from text file.
-    lookup <- load_lookup(lookup_file)
+  return(
+    .load_or_retrieve_file(lookup_file,
+                           load_lookup,
+                           use_cache,
+                           cache_dir)
+  )
+}
 
-    if (use_cache) { # nocov start
-        # ask for permission to write to cache
-        if (interactive()) {
-            if (isTRUE(utils::askYesNo(paste0("Cache lookup at ",
-                                              cache_filepath, "?")))) {
-                # make sure that the directory exists
-                if (!dir.exists(cache_dir)) {
-                    dir.create(path = cache_dir, recursive = TRUE)
-                }
-                saveRDS(lookup, cache_filepath)
-            }
+
+# .load_or_retrieve_file ------------------------------------------------------
+
+#' Load a vocab or lookup file, or retrieve from cache
+#'
+#' @param file Character; path to file to load.
+#' @param load_function Function to call to load vocabuary or lookup from txt.
+#' @param use_cache Logical; if TRUE, will attempt to retrieve the vocab or
+#'   lookup table from the specified cache location, or, if not found there,
+#'   will ask to save the vocabulary or lookup as an .rds file.
+#' @param cache_dir Character; the path to a cache directory (defaults to
+#'   location returned by `get_cache_dir()`).
+#'
+#' @return The lookup table or vocabulary as returned by `load_function`.
+#'
+#' @keywords internal
+.load_or_retrieve_file <- function(file,
+                                   load_function,
+                                   use_cache = TRUE,
+                                   cache_dir = get_cache_dir()) {
+  if (use_cache) {
+    cache_filepath <- file.path(cache_dir, 
+                                .make_cache_filename(file))
+    if (file.exists(cache_filepath)) {
+      return(readRDS(cache_filepath)) # nocov
+    }
+  }
+  # Guess we have to load the vocab or lookup from text file.
+  contents <- load_function(file)
+  
+  if (use_cache) { # nocov start
+    # ask for permission to write to cache
+    if (interactive()) {
+      if (isTRUE(utils::askYesNo(paste0("Cache contents at ",
+                                        cache_filepath, "?")))) {
+        # make sure that the directory exists
+        if (!dir.exists(cache_dir)) {
+          # probably should invalidate the cache across package versions
+          dir.create(path = cache_dir, recursive = TRUE)
         }
-    } # nocov end
-    return(lookup)
+        saveRDS(contents, cache_filepath)
+      }
+    }
+  } # nocov end
+  return(contents)
 }
 
 
