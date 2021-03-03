@@ -18,7 +18,5 @@ The lookup as a named list. Names are words in lookup.
 Load a morphemepiece lookup file
 }
 \examples{
-# Get path to sample vocabulary included with package.
-# vocab_path <- system.file("extdata", "tiny_vocab.txt", package = "wordpiece")
-# vocab <- load_vocab(vocab_file = vocab_path)
+# todo, after I make tiny sample vocab to include
 }

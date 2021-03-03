@@ -363,9 +363,7 @@ morphemepiece_tokenize <- function(text,
 #' @export
 #'
 #' @examples
-#' # Get path to sample vocabulary included with package.
-#' vocab_path <- system.file("extdata", "tiny_vocab.txt", package = "wordpiece")
-#' vocab <- load_vocab(vocab_file = vocab_path)
+#' # todo, after I make tiny sample vocab to include
 load_vocab <- function(vocab_file) {
     token_list <- readLines(vocab_file)
     token_list <- purrr::map_chr(token_list, function(token) {
@@ -408,9 +406,7 @@ load_vocab <- function(vocab_file) {
 #' @export
 #'
 #' @examples
-#' # Get path to sample file included with package.
-#' # vocab_path <- system.file("extdata", "file.txt", package = "morphemepiece")
-#' # vocab <- load_or_retrieve_vocab(vocab_file = vocab_path, use_cache = FALSE)
+#' # todo, after I make tiny sample vocab to include
 load_or_retrieve_vocab <- function(vocab_file,
                                    use_cache = TRUE,
                                    cache_dir = get_cache_dir()) {
@@ -436,9 +432,7 @@ load_or_retrieve_vocab <- function(vocab_file,
 #' @export
 #'
 #' @examples
-#' # Get path to sample vocabulary included with package.
-#' # vocab_path <- system.file("extdata", "tiny_vocab.txt", package = "wordpiece")
-#' # vocab <- load_vocab(vocab_file = vocab_path)
+#' # todo, after I make tiny sample vocab to include
 load_lookup <- function(lookup_file) {
     lookup_lines <- readLines(lookup_file)
     lookup_lines <- purrr::map_chr(lookup_lines, function(l) {
@@ -473,9 +467,7 @@ load_lookup <- function(lookup_file) {
 #' @export
 #'
 #' @examples
-#' # Get path to sample file included with package.
-#' # vocab_path <- system.file("extdata", "file.txt", package = "morphemepiece")
-#' # vocab <- load_or_retrieve_vocab(vocab_file = vocab_path, use_cache = FALSE)
+#' # todo, after I make tiny sample vocab to include
 load_or_retrieve_lookup <- function(lookup_file,
                                     use_cache = TRUE,
                                     cache_dir = get_cache_dir()) {
