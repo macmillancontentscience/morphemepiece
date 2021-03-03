@@ -539,7 +539,7 @@ load_or_retrieve_lookup <- function(lookup_file,
 
 # turn a flat mp vocab into a list of prefixes, words, suffixes
 .split_vocab <- function(vocab) {
-    frag_pat = "##"
+    frag_pat <- "##"
     is_prefix <- stringr::str_ends(vocab, paste0(".", frag_pat))
     prefixes <- stringr::str_sub(vocab[is_prefix], end = -3)
 

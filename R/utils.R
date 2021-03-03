@@ -336,7 +336,7 @@
 
 
 
-# .new_morphemepiece_vocabulary --------------------------------------------------
+# .new_morphemepiece_vocabulary ------------------------------------------------
 
 #' Constructor for Class morphemepiece_vocabulary
 #'
@@ -359,7 +359,7 @@
 
 
 
-# .validate_morphemepiece_vocabulary ----------------------------------------------
+# .validate_morphemepiece_vocabulary ------------------------------------------
 
 #' Validator for Objects of Class morphemepiece_vocabulary
 #'
