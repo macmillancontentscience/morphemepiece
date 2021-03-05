@@ -4,12 +4,22 @@
 \alias{morphemepiece_tokenize}
 \title{Tokenize Sequence with Morpheme Pieces}
 \usage{
-morphemepiece_tokenize(text, vocab)
+morphemepiece_tokenize(
+  text,
+  vocab,
+  lookup,
+  unk_token = "[UNK]",
+  max_chars = 100
+)
 }
 \arguments{
 \item{text}{Character scalar; text to tokenize.}
 
-\item{vocab}{A morphemepiece vocabulary.}
+\item{vocab}{Named integer vector containing vocabulary words. Should have
+"vocab_split" attribute, with components named "prefixes", "words",
+"suffixes".}
+
+\item{lookup}{A morphemepiece lookup table.}
 }
 \value{
 A character vector of tokenized text (later, this should be a named
@@ -17,6 +27,5 @@ integer vector, as in the wordpiece package.)
 }
 \description{
 Given a single sequence of text and a morphemepiece vocabulary, tokenizes the
-text. (This is \emph{not} fully functional yet. It's mainly a placeholder so that
-the package exports something.)
+text.
 }

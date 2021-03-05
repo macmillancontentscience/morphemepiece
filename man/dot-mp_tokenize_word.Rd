@@ -2,23 +2,43 @@
 % Please edit documentation in R/morphemepiece.R
 \name{.mp_tokenize_word}
 \alias{.mp_tokenize_word}
-\title{Apply Morphemepiece tokenization to word}
+\title{Tokenize a Word}
 \usage{
-.mp_tokenize_word(word, vocab)
+.mp_tokenize_word(
+  word,
+  vocab_split,
+  dir = 1,
+  unk_token = "[UNK]",
+  max_chars = 100
+)
 }
 \arguments{
-\item{word}{Character; word to tokenize.}
+\item{word}{Word to tokenize.}
 
-\item{vocab}{A morphemepiece vocabulary.}
+\item{vocab_split}{List of named integer vector containing vocabulary words.
+Should have components named "prefixes", "words", "suffixes"}
+
+\item{dir}{Integer; if 1 (the default), look for tokens starting at the
+beginning of the word. Otherwise, start at the end.}
+
+\item{unk_token}{Token to represent unknown words.}
+
+\item{max_chars}{Maximum length of word recognized.}
 }
 \value{
-A character vector corresponding to the original word, broken into
-pieces.
+Input word as a list of tokens.
 }
 \description{
-Repeatedly pull out the longest valid vocabulary piece from the word until
-the whole word is represented in terms of vocabulary pieces. This algorithm
-is intended to be used as a "fall-back" for words that are not found in the
-morphemepiece lookup table.
+Tokenize a single "word" (no whitespace). The word can technically contain
+punctuation, but typically punctuation has been split off by this point.
+}
+\details{
+This is an adaptation of wordpiece:::.tokenize_word. The main differences are
+that it was designed to work with a morphemepiece vocabulary, which can
+include prefixes (denoted like "pre##"). As in wordpiece, the algorithm uses
+a repeated greedy search for the largest piece from the vocabulary found
+within the word, but starting from either the beginning or the end of the
+word (controlled by the \code{dir} parameter). The input vocabulary must be split
+into prefixes, suffixes, and "words".
 }
 \keyword{internal}

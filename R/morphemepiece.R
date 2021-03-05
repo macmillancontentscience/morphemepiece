@@ -126,67 +126,176 @@ magrittr::`%>%`
 
 # .mp_tokenize_word -----------------------------------------------------------
 
-#' Apply Morphemepiece tokenization to word
+#' Tokenize a Word
 #'
-#' Repeatedly pull out the longest valid vocabulary piece from the word until
-#' the whole word is represented in terms of vocabulary pieces. This algorithm
-#' is intended to be used as a "fall-back" for words that are not found in the
-#' morphemepiece lookup table.
+#' Tokenize a single "word" (no whitespace). The word can technically contain
+#' punctuation, but typically punctuation has been split off by this point.
 #'
-#' @param word Character; word to tokenize.
-#' @param vocab A morphemepiece vocabulary.
+#' This is an adaptation of wordpiece:::.tokenize_word. The main differences are
+#' that it was designed to work with a morphemepiece vocabulary, which can
+#' include prefixes (denoted like "pre##"). As in wordpiece, the algorithm uses
+#' a repeated greedy search for the largest piece from the vocabulary found
+#' within the word, but starting from either the beginning or the end of the
+#' word (controlled by the `dir` parameter). The input vocabulary must be split
+#' into prefixes, suffixes, and "words".
+#' 
+#' @param word Word to tokenize.
+#' @param vocab_split List of named integer vector containing vocabulary words.
+#'   Should have components named "prefixes", "words", "suffixes"
+#' @param dir Integer; if 1 (the default), look for tokens starting at the
+#'   beginning of the word. Otherwise, start at the end.
+#' @param unk_token Token to represent unknown words.
+#' @param max_chars Maximum length of word recognized.
 #'
-#' @return A character vector corresponding to the original word, broken into 
+#' @return Input word as a list of tokens.
+#' @keywords internal
+.mp_tokenize_word <- function(word, 
+                              vocab_split, 
+                              dir = 1, # -1 for backwards
+                              unk_token = "[UNK]",
+                              max_chars = 100) {
+  if (nchar(word) > max_chars) {
+    return(unk_token)
+  }
+  frag_pat <- "##"
+  
+  prefixes <- vocab_split$prefixes
+  words <- vocab_split$words
+  suffixes <- vocab_split$suffixes
+  
+  is_bad  <- FALSE
+  start <- 1
+  sub_tokens <- character(0)
+  
+  wordlen <- nchar(word)
+  end <- wordlen
+  
+  if (dir == 1) {
+    # rules for what kind of token can follow what (prefix, word, suffix)
+    allowed_next_rules <- list("p" = c("p", "w", "s"),
+                               "w" = "s",
+                               "s" = "s")
+    allowed_next <- c("p", "w")
+  } else {
+    # for backwards run
+    allowed_next_rules <- list("s" = c("p", "w", "s"),
+                               "w" = "p",
+                               "p" = "p")
+    
+    allowed_next <- c("s", "w")  
+  }
+  
+  keepgoing <- TRUE
+  while (keepgoing) {
+    if (dir == 1) {
+      end <- wordlen
+    } else {
+      start <- 1
+    }
+    
+    cur_substr  <- NA_character_
+    while (start <= end) {
+      sub_str <- substr(word, start, end)   # inclusive on both ends
+      
+      # first look for prefixes, if allowed
+      if ("p" %in% allowed_next & end < wordlen & sub_str %in% prefixes) {
+        cur_substr <- paste0(sub_str, frag_pat)
+        allowed_next <- allowed_next_rules[["p"]]
+        break
+      }
+      # next, look for suffix-like pieces, if we're not at start of word
+      if ("s" %in% allowed_next & start > 1 & sub_str %in% suffixes) {
+        cur_substr <- paste0(frag_pat, sub_str)
+        allowed_next <- allowed_next_rules[["s"]]
+        break
+      }
+      # finally, look for complete words, if allowed
+      if ("w" %in% allowed_next & sub_str %in% words) {
+        cur_substr <- sub_str
+        allowed_next <- allowed_next_rules[["w"]]
+        break
+      }
+      
+      if (dir == 1) {
+        end <- end - 1 # forward; hold start fixed
+      } else {
+        start <- start + 1 # backward; hold end fixed
+      }
+    }
+    
+    if (is.na(cur_substr[[1]]) ) {
+      is_bad <-  TRUE #nocov
+      break           #nocov
+    }
+    
+    if (dir == 1) {
+      sub_tokens <- append(sub_tokens, cur_substr) # append to end
+      start <- end + 1 # rest of word, after taking piece off the front
+      keepgoing <- start <= wordlen
+    } else {
+      sub_tokens <- append(cur_substr, sub_tokens) # append to beginning
+      end <- start - 1 # rest of word, after taking piece off the end
+      keepgoing <- end >= 1
+    }
+  }
+  
+  if (is_bad) {
+    return(unk_token) #nocov
+  }
+  return(sub_tokens)
+}
+
+
+# .mp_tokenize_word_bidir -------------------------------------------------
+
+#' Tokenize a Word Bidirectionally
+#'
+#' Apply .mp_tokenize_word from both directions and pick the result with fewer
 #' pieces.
 #'
+#' @param word Word to tokenize.
+#' @param vocab Named integer vector containing vocabulary words. Should have
+#'   "vocab_split" attribute, with components named "prefixes", "words",
+#'   "suffixes".
+#'
+#' @return Input word as a list of tokens.
 #' @keywords internal
-.mp_tokenize_word <- function(word, vocab) {
-    # handle prefixes a little differently...
-    prefixes <- vocab[stringr::str_ends(vocab, "##")]
-    names(prefixes) <- stringr::str_sub(prefixes, end = -3)
-    
-    # here, the names have the ##, because that's what's unique.
-    mp_vocab_nohash <- stringr::str_remove_all(vocab, "#")
-    names(mp_vocab_nohash) <- vocab
-    
-    current_breakdown <- word
-    keepgoing <- TRUE
-    while(keepgoing) {
-        current_breakdown <- current_breakdown[current_breakdown != ""]
-        piece_found <- current_breakdown %in% vocab
-        if (all(piece_found)) {
-            break
-        } else {
-            piece_to_work_on <- match(FALSE, piece_found)
-            current_word <- current_breakdown[piece_to_work_on]
-        }
-        original_start <- FALSE
-        if (piece_to_work_on == 1) {
-            original_start <- TRUE
-        }
-        original_end <- FALSE
-        if (piece_to_work_on == length(current_breakdown)) {
-            original_end <- TRUE
-        }
-
-        this_breakdown <- unlist(
-            .pull_out_longest_piece(current_word, mp_vocab_nohash,
-                                    original_start = original_start,
-                                    original_end = original_end,
-                                    prefixes = prefixes)
-        )
-        if (!stringr::str_ends(this_breakdown[[2]], "##") & 
-            this_breakdown[[3]] != "") {
-            this_breakdown[[3]] <- paste0("##", this_breakdown[[3]])
-        }
-        if (!stringr::str_starts(this_breakdown[[2]], "##") & 
-            this_breakdown[[1]] != "") {
-            this_breakdown[[1]] <- paste0(this_breakdown[[1]], "##")
-        }
-        current_breakdown[piece_to_work_on] <- list(this_breakdown)
-        current_breakdown <- unlist(current_breakdown)
+.mp_tokenize_word_bidir <- function(word, vocab) {
+    vocab_split <- attr(vocab, "vocab_split")
+    t1 <- .mp_tokenize_word(word, vocab_split, dir = 1)
+    t2 <- .mp_tokenize_word(word, vocab_split, dir = -1)
+    if (length(t2) < length(t1) & length(t2) > 1) {
+        return(t2)
+    } else {
+        return(t1)
     }
-    return(current_breakdown)
+}
+
+# .mp_tokenize_word_lookup -------------------------------------------------
+
+#' Tokenize a Word Including Lookup
+#'
+#' Look up a word in the table; go to fall-back otherwise.
+#'
+#' @inheritParams .mp_tokenize_word_bidir
+#' @param lookup A morphemepiece lookup table.
+#'
+#' @return Input word, broken into tokens.
+#' @keywords internal
+.mp_tokenize_word_lookup <- function(word, vocab, lookup) {
+    if (word %in% names(vocab)) { # punctuation, etc.
+        return(vocab[word])
+    }
+    # may as well remove unbroken words from lookup, even though it's relatively
+    # small component?
+    # mean(purrr::map_int(lookup, grepl, pattern="##"))
+    if (word %in% names(lookup)) { 
+        breakdown <- lookup[[word]]
+        token_list <- stringr::str_split(breakdown, pattern = " ")[[1]]
+    } else {
+        token_list <- .mp_tokenize_word_bidir(word, vocab)
+    }
+    return(vocab[token_list])
 }
 
 
@@ -196,38 +305,243 @@ magrittr::`%>%`
 #' Tokenize Sequence with Morpheme Pieces
 #'
 #' Given a single sequence of text and a morphemepiece vocabulary, tokenizes the
-#' text. (This is *not* fully functional yet. It's mainly a placeholder so that
-#' the package exports something.)
-#' 
+#' text.  
 #'
-#' @inheritParams .mp_tokenize_word
+#' @inheritParams .mp_tokenize_word_lookup
 #' @param text Character scalar; text to tokenize.
 #'
 #' @return A character vector of tokenized text (later, this should be a named
 #' integer vector, as in the wordpiece package.)
 #' @export
 morphemepiece_tokenize <- function(text,
-                                   vocab) {
-
+                                   vocab,
+                                   lookup,
+                                   unk_token = "[UNK]",
+                                   max_chars = 100) {
+  is_cased <- attr(vocab, "is_cased")
+  if (!is_cased) {
     text <- tolower(text)
-
-    # collapse whitespace
-    text <- stringr::str_replace_all(text, pattern = "\\s+", " ")
-    # for placeholder, strip out all non-latin characters
-    text <- stringr::str_remove_all(text, pattern = "[^a-z ]")
-
-    # split on whitespace
-    text <- unlist(stringi::stri_split_regex(text, "\\s", omit_empty = TRUE))
-    # tokenize each piece
-    text <- purrr::map(text, .f = .mp_tokenize_word, vocab = vocab)
-    text <- unlist(text)
-    # eventually want to do something like:
-    # ids <- vocab[text]
-    # names(ids) <- text
-    # return(ids)
-    return(text)
-    #  For testing on datascience:
-    #  mp_vocab <- readRDS("/shared/morphemepiece_vocabs/mp_vocab.rds")
-    #  morphemepiece_tokenize("I love tacos! And prexxxxationings", mp_vocab)
+  }
+  
+  text <- .convert_to_unicode(text)
+  text <- .clean_text(text)
+  text <- .tokenize_chinese_chars(text)
+  text <- .strip_accents(text)
+  text <- .split_on_punc(text)
+  text <- purrr::map(wordpiece:::.whitespace_tokenize(text),
+                     .f = .mp_tokenize_word_lookup, 
+                     vocab = vocab, 
+                     lookup = lookup)
+  text <- unlist(text)
+  return(text)
+  #  For testing on datascience:
+  # mp_vocab <- load_or_retrieve_vocab("/shared/morphemepiece_vocabs/mp_vocab_big.txt")
+  # mp_lookup <- load_or_retrieve_lookup("/shared/morphemepiece_vocabs/mp_lookup_big.txt")
+  # morphemepiece_tokenize("I love tacos! And prexxxxationings", mp_vocab, mp_lookup)
 }
 
+
+# load_vocab --------------------------------------------------------------
+
+
+#' Load a vocabulary file
+#'
+#' @param vocab_file path to vocabulary file. File is assumed to be a text file,
+#'   with one token per line, with the line number (starting at zero)
+#'   corresponding to the index of that token in the vocabulary.
+#'
+#' @return The vocab as a named integer vector. Names are tokens in vocabulary,
+#'   values are integer indices. The casedness of the vocabulary is inferred
+#'   and attached as the "is_cased" attribute.
+#'
+#'   Note that from the perspective of a neural net, the numeric indices *are*
+#'   the tokens, and the mapping from token to index is fixed. If we changed the
+#'   indexing, it would break any pre-trained models using that vocabulary. This
+#'   is why the vocabulary is stored as a named integer vector, and why it
+#'   starts with index zero.
+#'
+#' @export
+#'
+#' @examples
+#' # todo, after I make tiny sample vocab to include
+load_vocab <- function(vocab_file) {
+    token_list <- readLines(vocab_file)
+    token_list <- purrr::map_chr(token_list, function(token) {
+        .convert_to_unicode(trimws(token))})
+    # The vocab is zero-indexed.
+    named_vocab <- seq_along(token_list) -1
+    names(named_vocab) <- token_list
+    
+    # attach processed form of vocab as attribute to speed up computations.
+    vocab_split <- .split_vocab(token_list)
+    is_cased <- .infer_case_from_vocab(token_list) # sure, why not.
+    vocab_all <- .new_morphemepiece_vocabulary(named_vocab, 
+                                               vocab_split, 
+                                               is_cased)
+    return(.validate_morphemepiece_vocabulary(vocab_all))
+}
+
+
+# load_or_retrieve_vocab  ------------------------------------------------------
+
+
+#' Load a vocabulary file, or retrieve from cache
+#'
+#' @inheritParams load_vocab
+#' @param use_cache Logical; if TRUE, will attempt to retrieve the vocabulary
+#'   from the specified cache location, or, if not found there, will ask to save
+#'   the vocabulary as an .rds file.
+#' @param cache_dir Character; the path to a cache directory (defaults to
+#'   location returned by `get_cache_dir()`).
+#'
+#' @return The vocab as a list of named integer vectors. Names are tokens in
+#'   vocabulary, values are integer indices. The casedness of the vocabulary is
+#'   inferred and attached as the "is_cased" attribute.
+#'
+#'   Note that from the perspective of a neural net, the numeric indices *are*
+#'   the tokens, and the mapping from token to index is fixed. If we changed the
+#'   indexing, it would break any pre-trained models. This is why the vocabulary
+#'   is stored as a named integer vector, and why it starts with index zero.
+#'
+#' @export
+#'
+#' @examples
+#' # todo, after I make tiny sample vocab to include
+load_or_retrieve_vocab <- function(vocab_file,
+                                   use_cache = TRUE,
+                                   cache_dir = get_cache_dir()) {
+  return(
+    .load_or_retrieve_file(vocab_file,
+                           load_vocab,
+                           use_cache,
+                           cache_dir)
+  )
+}
+
+# load_lookup --------------------------------------------------------------
+
+
+#' Load a morphemepiece lookup file
+#'
+#' @param lookup_file path to vocabulary file. File is assumed to be a text file,
+#'   with one word per line. The lookup value, if different from the word,
+#'   follows the word on the same line, after a space.
+#'
+#' @return The lookup as a named list. Names are words in lookup.
+#'
+#' @export
+#'
+#' @examples
+#' # todo, after I make tiny sample vocab to include
+load_lookup <- function(lookup_file) {
+    lookup_lines <- readLines(lookup_file)
+    lookup_lines <- purrr::map_chr(lookup_lines, function(l) {
+        .convert_to_unicode(stringr::str_remove_all(l, "[^a-z]*$"))
+        # patch for now; fix in wikimorphemes (see "blithely" "fidget" "cyber")
+        })
+    split_lup <- stringr::str_split_fixed(lookup_lines, pattern = " ", n = 2)
+
+    words <- split_lup[,1]
+    breakdowns <- split_lup[,2]
+    no_breakdown <- breakdowns == ""
+    breakdowns[no_breakdown] <- words[no_breakdown]
+    names(breakdowns) <- words
+    return(breakdowns) # maybe later make class?
+}
+
+
+# load_or_retrieve_lookup ------------------------------------------------------
+#generalize vocab function to do both
+
+#' Load a lookup file, or retrieve from cache
+#'
+#' @inheritParams load_lookup
+#' @param use_cache Logical; if TRUE, will attempt to retrieve the lookup
+#'   from the specified cache location, or, if not found there, will ask to save
+#'   the lookup as an .rds file.
+#' @param cache_dir Character; the path to a cache directory (defaults to
+#'   location returned by `get_cache_dir()`).
+#'
+#' @return The lookup table as a named character vector.
+#'
+#' @export
+#'
+#' @examples
+#' # todo, after I make tiny sample vocab to include
+load_or_retrieve_lookup <- function(lookup_file,
+                                    use_cache = TRUE,
+                                    cache_dir = get_cache_dir()) {
+  return(
+    .load_or_retrieve_file(lookup_file,
+                           load_lookup,
+                           use_cache,
+                           cache_dir)
+  )
+}
+
+
+# .load_or_retrieve_file ------------------------------------------------------
+
+#' Load a vocab or lookup file, or retrieve from cache
+#'
+#' @param file Character; path to file to load.
+#' @param load_function Function to call to load vocabuary or lookup from txt.
+#' @param use_cache Logical; if TRUE, will attempt to retrieve the vocab or
+#'   lookup table from the specified cache location, or, if not found there,
+#'   will ask to save the vocabulary or lookup as an .rds file.
+#' @param cache_dir Character; the path to a cache directory (defaults to
+#'   location returned by `get_cache_dir()`).
+#'
+#' @return The lookup table or vocabulary as returned by `load_function`.
+#'
+#' @keywords internal
+.load_or_retrieve_file <- function(file,
+                                   load_function,
+                                   use_cache = TRUE,
+                                   cache_dir = get_cache_dir()) {
+  if (use_cache) {
+    cache_filepath <- file.path(cache_dir, 
+                                .make_cache_filename(file))
+    if (file.exists(cache_filepath)) {
+      return(readRDS(cache_filepath)) # nocov
+    }
+  }
+  # Guess we have to load the vocab or lookup from text file.
+  contents <- load_function(file)
+  
+  if (use_cache) { # nocov start
+    # ask for permission to write to cache
+    if (interactive()) {
+      if (isTRUE(utils::askYesNo(paste0("Cache contents at ",
+                                        cache_filepath, "?")))) {
+        # make sure that the directory exists
+        if (!dir.exists(cache_dir)) {
+          # probably should invalidate the cache across package versions
+          dir.create(path = cache_dir, recursive = TRUE)
+        }
+        saveRDS(contents, cache_filepath)
+      }
+    }
+  } # nocov end
+  return(contents)
+}
+
+
+# .split_vocab ------------------------------------------------------------
+
+# turn a flat mp vocab into a list of prefixes, words, suffixes
+.split_vocab <- function(vocab) {
+    frag_pat <- "##"
+    is_prefix <- stringr::str_ends(vocab, paste0(".", frag_pat))
+    prefixes <- stringr::str_sub(vocab[is_prefix], end = -3)
+
+    is_suffix <- stringr::str_starts(vocab, paste0(frag_pat, "."))
+    suffixes <- stringr::str_sub(vocab[is_suffix], start = 3)
+
+    is_word <- stringr::str_ends(vocab, frag_pat, negate = TRUE) &
+        stringr::str_starts(vocab, frag_pat, negate = TRUE)
+    words <- vocab[is_word]
+    return(list(prefixes = prefixes,
+                words = words,
+                suffixes = suffixes))
+}
