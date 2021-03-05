@@ -33,7 +33,7 @@ Tokenize a single "word" (no whitespace). The word can technically contain
 punctuation, but typically punctuation has been split off by this point.
 }
 \details{
-This is an adapdation of wordpiece:::.tokenize_word. The main differences are
+This is an adaptation of wordpiece:::.tokenize_word. The main differences are
 that it was designed to work with a morphemepiece vocabulary, which can
 include prefixes (denoted like "pre##"). As in wordpiece, the algorithm uses
 a repeated greedy search for the largest piece from the vocabulary found
