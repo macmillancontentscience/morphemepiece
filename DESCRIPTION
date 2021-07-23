@@ -32,6 +32,7 @@ Imports:
     stringi (>= 1.0),
     stringr (>= 1.4.0)
 Suggests:
+    wordpiece,
     testthat,
     knitr,
     rmarkdown
