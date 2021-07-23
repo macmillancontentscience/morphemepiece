@@ -8,6 +8,7 @@
   word,
   vocab_split,
   dir = 1,
+  allow_compounds = TRUE,
   unk_token = "[UNK]",
   max_chars = 100
 )
@@ -20,6 +21,9 @@ Should have components named "prefixes", "words", "suffixes"}
 
 \item{dir}{Integer; if 1 (the default), look for tokens starting at the
 beginning of the word. Otherwise, start at the end.}
+
+\item{allow_compounds}{Logical; whether to allow multiple whole words in the
+breakdown.}
 
 \item{unk_token}{Token to represent unknown words.}
 

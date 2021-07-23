@@ -1,0 +1,19 @@
+---
+title: "Testing the fall-through algorithm"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Testing the fall-through algorithm}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(morphemepiece)
+```
