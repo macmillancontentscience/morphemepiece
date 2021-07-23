@@ -10,10 +10,116 @@ vignette: >
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
+  eval = FALSE,
   comment = "#>"
 )
 ```
 
 ```{r setup}
 library(morphemepiece)
+library(dplyr)
 ```
+
+This vignette is developer-focused, and outlines an example process for 
+evaluating different (versions of) fall-through algorithms for the
+morphemepiece tokenizer. The basic approach is...
+
+- Obtain a list of words with known breakdown, which are also representative of 
+  words that would actually hit the algorithm. The words should not be too 
+  common (else they will always be in the lookup), nor too rare/artificial
+  (otherwise they are not a good representation of actual usage). A reasonable
+  prescription here is to take the difference between the large/small lookup
+  tables.
+- Process this list of words using each candidate algorithm.
+- Score each result by comparing the algorithmic breakdown to the known
+  breakdown. We compute score by finding the "F1" when comparing the two sets
+  of tokens to each other (identical breakdowns score a 1.0, while any missing
+  tokens in either direction will reduce the score).
+
+```{r}
+# These are local paths for illustration purposes
+vocab_path <- "/shared/morphemepiece_vocabs/mp_vocab_large.txt"
+lookup_path <- "/shared/morphemepiece_vocabs/mp_lookup_large.txt"
+# We will be interested in words that are in the large lookup, but not the small
+# one (as a proxy for the most common words that will hit the fallthrough
+# algorithm).
+lookup_path_small <- "/shared/morphemepiece_vocabs/mp_lookup_small.txt"
+
+mp_vocab <- load_or_retrieve_vocab(vocab_path)
+mp_lookup <- load_or_retrieve_lookup(lookup_path)
+mp_lookup_small <- load_or_retrieve_lookup(lookup_path_small)
+
+```
+
+Obtain the words, and process...
+
+```{r}
+breakdown1 <- list()
+breakdown2 <- list()
+words_to_do <- setdiff(names(mp_lookup), names(mp_lookup_small))
+# It takes about an hour to do all words in this set.
+for (word in words_to_do) {
+  bd1 <- morphemepiece:::.mp_tokenize_word_bidir(word, 
+                                                 mp_vocab, 
+                                                 allow_compounds = FALSE)
+  bd2 <- morphemepiece:::.mp_tokenize_word_bidir(word, 
+                                                 mp_vocab, 
+                                                 allow_compounds = TRUE)
+  breakdown1 <- append(breakdown1, paste0(bd1, collapse = " "))
+  breakdown2 <- append(breakdown2, paste0(bd2, collapse = " "))
+}
+
+actual_bd <- mp_lookup[words_to_do]
+wdtbl <- tibble::tibble(words_to_do, actual_bd, bd1 = unlist(breakdown1), bd2 = unlist(breakdown2))
+
+calc_score <- function(bd0, bd) {
+  bd0 <- stringr::str_split(bd0, " ", simplify = FALSE)
+  bd <- stringr::str_split(bd, " ", simplify = FALSE)
+  bd0 <- purrr::map(bd0, function(b) {b[b != "##"]} )
+  bd <- purrr::map(bd, function(b) {b[b != "##"]} )
+
+  unlist(purrr::map2(bd0, bd, function(a, b) {
+    re <- mean(a %in% b)
+    pr <- mean(b %in% a)
+    if (re == 0 & pr == 0) {
+      return(0)
+    }
+    f1 <- 2*re*pr / (re + pr)
+    return(f1)
+    }))
+}
+
+
+scored <- wdtbl %>% 
+  filter(bd1 != bd2) %>% 
+  mutate(score1 = calc_score(actual_bd, bd1)) %>% 
+  mutate(score2 = calc_score(actual_bd, bd2))
+
+# what was the mean score of each algorithm? (1=old, 2=new)
+mean(scored$score1) # 0.3717737
+mean(scored$score2) # 0.4134288
+
+# what fraction of words did each algorithm score 100% on?
+mean(scored$score1 == 1) # 0.03477313
+mean(scored$score2 == 1) # 0.1674262
+
+# what fraction of words did each algorithm score 0% on?
+mean(scored$score1 == 0) # 0.1803051
+mean(scored$score2 == 0) # 0.2317713
+
+# in what fraction of cases was the old or new algorithm strictly better?
+scored %>% 
+  mutate(old_better = score1 > score2) %>% 
+  mutate(new_better = score1 < score2) %>% 
+  summarize(mean(old_better), mean(new_better))
+
+# # A tibble: 1 x 2
+#   `mean(old_better)` `mean(new_better)`
+#                <dbl>              <dbl>
+# 1              0.343              0.536
+
+```
+
+By almost all measures, the new algorithm gives breakdowns closer to "correct"
+than the old one. However, the new alogrithm scores 0 more often than the old,
+so the comparison isn't completely one-sided.

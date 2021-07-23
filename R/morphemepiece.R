@@ -276,7 +276,8 @@ magrittr::`%>%`
 #'   "vocab_split" attribute, with components named "prefixes", "words",
 #'   "suffixes".
 #' @param allow_compounds Logical; whether to allow multiple whole words in the
-#'   breakdown.
+#'   breakdown. Default is TRUE. This option will not be exposed to end users;
+#'   it is kept here for documentation + development purposes.
 #'   
 #' @return Input word as a list of tokens.
 #' @keywords internal
@@ -286,7 +287,11 @@ magrittr::`%>%`
                             allow_compounds = allow_compounds)
     t2 <- .mp_tokenize_word(word, vocab_split, dir = -1,
                             allow_compounds = allow_compounds)
-    if (length(t2) < length(t1) & length(t2) > 1) {
+    # Let's *not* count the ## token for purposes of deciding which breakdown
+    # to take. But we may want to come back to this, since it seemed to help.
+    t1_0 <- t1[t1 != "##"]
+    t2_0 <- t2[t2 != "##"]
+    if (length(t2_0) < length(t1_0) & length(t2) > 1) {
         return(t2)
     } else {
         return(t1)

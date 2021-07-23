@@ -14,7 +14,8 @@
 "suffixes".}
 
 \item{allow_compounds}{Logical; whether to allow multiple whole words in the
-breakdown.}
+breakdown. Default is TRUE. This option will not be exposed to end users;
+it is kept here for documentation + development purposes.}
 }
 \value{
 Input word as a list of tokens.
