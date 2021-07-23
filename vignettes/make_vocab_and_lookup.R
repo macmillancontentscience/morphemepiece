@@ -1,7 +1,6 @@
 # Creates a morphemepiece vocabulary and lookup table, given a processed 
 # wiktionary dump and an existing wordpiece vocabulary.
 # Optionally, a word frequency table from some corpus can be given.
-# Tables should have columns named...
 #
 
 make_vocab_and_lookup <- function(processed_wiktionary, 
@@ -16,7 +15,7 @@ make_vocab_and_lookup <- function(processed_wiktionary,
 
   actual_wp_words <- get_actual_wp_words(processed_wiktionary, wp_vocab)
   # short actual words from wp will get a VIP pass directly to vocab.
-  # Though most of them wouldn't be considered words by most people. :-P
+  # Though most of them wouldn't be considered words by most people. :)
   short_words <- actual_wp_words[nchar(actual_wp_words) <= 3]
   rest_of_words <- actual_wp_words[nchar(actual_wp_words) > 3]
   # make sure we keep enough tokens to cover the rest of the wp words
@@ -100,10 +99,6 @@ unnest_pw <- function(processed_wiktionary, clean = TRUE) {
   return(upw)
 }
 unnest_pw <- memoise::memoise(unnest_pw)
-# system.time(
-#   unnested_processed_wiktionary <- unnest_pw(processed_wiktionary, clean = TRUE)
-# )
-# word_freq_tab <- readRDS("~/scratch/word_frequency_table.rds")
 
 get_token_counts <- function(unnested_processed_wiktionary,
                              word_freq_tab = NULL) {
