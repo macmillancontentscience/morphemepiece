@@ -35,17 +35,24 @@ To make a morphemepiece vocab, start with...
 # load functions to make the vocab + lookup
 source("make_vocab_and_lookup.R")
 
+# Local paths to wordpiece vocabulary, processed wikimorphemes cache, and a word
+# frequency table. (I used a word frequency table derived from the wikitext-103
+# corpus.) The word frequency table should have character column "word" and
+# integer column "word_count".
+# See the wikimorphemes package at
+# https://github.com/jonthegeek/wikimorphemes
+# for more detailed information.
 
-# local cache directory (clean these paths up?)
-local_cd <- "/shared/wiktionary"
-processed_wiktionary <- readRDS(file.path(local_cd, "wikimorphemes.rds"))
+wordpiece_vocab_path <- "/shared/BERT_checkpoints/bert_base_uncased/vocab.txt"
+proc_wm_path <- "/shared/wiktionary/wikimorphemes.rds"
+sample_corpus_wf_path <- "/shared/sample_corpus/word_frequency_table.rds"
 
-wp_path <- "/shared/BERT_checkpoints/bert_base_uncased/vocab.txt"
-# {wordpiece} formats the vocab as a named integer vector, where the name is 
-# the token and the value is the token id.
-wp_vocab <- wordpiece::load_or_retrieve_vocab(wp_path)
-
-word_freq_tab <- readRDS("~/scratch/word_frequency_table.rds")
+# Use {wordpiece} to read vocab. Note that {wordpiece} formats the vocab as a
+# named integer vector, where the name is the token and the value is the token
+# id.
+wp_vocab <- wordpiece::load_or_retrieve_vocab(wordpiece_vocab_path)
+processed_wiktionary <- readRDS(proc_wm_path)
+word_freq_tab <- readRDS(sample_corpus_wf_path)
 
 ```
 
@@ -62,6 +69,16 @@ unnested_processed_wiktionary <- unnest_pw(processed_wiktionary, clean = TRUE)
 token_counts <- get_token_counts(unnested_processed_wiktionary)
 
 head(token_counts) # top token is ##s, unsurprisingly
+# # A tibble: 6 x 3
+#   token token_score  rank
+#   <chr>       <dbl> <int>
+# 1 ##s        174957     1
+# 2 ##ed        39325     2
+# 3 ##ing       39247     3
+# 4 ##er        22431     4
+# 5 un##        15747     5
+# 6 ##ly        14054     6
+
 
 # We rank tokens in order of frequency. We can also rank *words* in order of the
 # maximum rank that their component tokens have. This shows which words would be
@@ -87,6 +104,11 @@ words_vs_tokens <- words_with_max_token_ranks %>%
   dplyr::arrange(max_rank) %>% 
   dplyr::mutate(n_words = cumsum(n_words))
 
+# Total number of distinct tokens:
+max(words_vs_tokens$max_rank)  # 189209
+# Total number of distinct words:
+max(words_vs_tokens$n_words)  # 638316
+
 # plot!
 words_vs_tokens %>% 
   dplyr::mutate(frac_words = n_words/max(n_words)) %>% 
@@ -96,7 +118,9 @@ words_vs_tokens %>%
 
 ```
 
-Note that only about 5% of the morpheme tokens (out of about 190K) are needed to 
+![](words_vs_tokens1.png)
+
+Note that only about 5% of the morpheme tokens (out of about 189K) are needed to 
 cover about 50% of the words (out of about 638K).
 
 The above weighted each word equally, no matter how frequently it occurs.
@@ -111,6 +135,15 @@ token_counts_weighted <- get_token_counts(unnested_processed_wiktionary,
                                           word_freq_tab)
 # now the top token is "the", just because of how common that word is.
 head(token_counts_weighted)
+# # A tibble: 6 x 3
+#   token token_score  rank
+#   <chr>       <dbl> <int>
+# 1 the       6475974     1
+# 2 ##s       5837241     2
+# 3 ##ed      4384989     3
+# 4 of        2755962     4
+# 5 and       2516910     5
+# 6 ##ing     2381396     6
 
 words_with_max_token_ranks_weighted <- dplyr::left_join(
   unnested_processed_wiktionary, 
@@ -146,6 +179,9 @@ words_vs_tokens_weighted %>%
   ggplot2::geom_point() 
 
 ```
+
+![](words_vs_tokens2.png)
+
 
 The top 5% of tokens would cover over 98% of words by usage.
 
@@ -222,6 +258,7 @@ corpus_coverage_small <- left_join(word_freq_tab,
 
 corpus_coverage_small %>% 
   summarize(sum(covered_weighted)/sum(word_count))
+# 0.9495136
 ```
 
 The "small" vocabulary covers just under 95% of words from the corpus, weighted
@@ -240,6 +277,7 @@ corpus_coverage_large <- left_join(word_freq_tab,
 
 corpus_coverage_large %>% 
   summarize(sum(covered_weighted)/sum(word_count))
+# 0.9644623
 ```
 
 The "large" vocabulary covers about 1.5% more words (weighted) than the "small"
@@ -252,7 +290,23 @@ by the vocabularies:
 #large
 corpus_coverage_large %>% 
   filter(!covered) %>% 
-  arrange(desc(word_count)) %>% head(10)
+  arrange(desc(word_count)) %>% 
+  head(10) %>% 
+  select(word, word_count)
+
+# # A tibble: 10 x 2
+#    word    word_count
+#    <chr>        <int>
+#  1 km           40555
+#  2 los          10960
+#  3 cm            9335
+#  4 kg            6269
+#  5 von           5467
+#  6 didn          5351
+#  7 beyoncé       4583
+#  8 mulder        4177
+#  9 doesn         2951
+# 10 du            2735
 ```
 
 Ah, our process (as of June 2021) has a hole: abbreviations such as "km" and 
@@ -297,7 +351,7 @@ words <- words %>%
   }) 
   )
 
-ss_url <- "https://docs.google.com/spreadsheets/d/1iVUuRPVfNMhfSs5mRglV9AgsJcDHABQKv4pawfXJvoE/"
+# ss_url <- "url of mp_scratch google sheet"
 
 # already authorized
 # googlesheets4::write_sheet(words, ss_url)
@@ -306,31 +360,41 @@ checked_words <- googlesheets4::read_sheet(ss_url, sheet = "check common words")
 
 # if breakdown is ok, value is "y"
 mean(checked_words$is_ok == "y")
+# [1] 0.9711062
 # many of the exceptions can/should be fixed in wiktionary
 ```
 
-Randomly pick some words of at least length 4 without a breakdown...
+Fewer than 3% of these words (about 100 total) were judged to be problematic.
+For these common words, it makes sense for us to address the issues directly in
+Wiktionary where possible.
+
+For the next check, randomly pick some words of at least length 4 without a 
+breakdown:
 
 ```{r}
 all_words <- unique(unnested_processed_wiktionary$word)
 unbroken_vocab_words <- intersect(names(vocab), all_words)
 unbroken_vocab_words <- unbroken_vocab_words[nchar(unbroken_vocab_words) > 3]
 
-# sample a few hundred?
+# sample a few hundred
 unbroken_sample <- dplyr::tibble(unbroken_word = sample(unbroken_vocab_words, 
                                                         size = 300))
 # send to google sheet for manual check
 
 # googlesheets4::write_sheet(unbroken_sample, ss_url, sheet = "unbroken_check")
 # manual check, add column "is_ok"
-checked_unbroken_words <- googlesheets4::read_sheet(ss_url, 
-                                                    sheet = "check unbroken words")
+checked_unbroken_words <- googlesheets4::read_sheet(
+  ss_url, 
+  sheet = "check unbroken words"
+)
 
 # if breakdown is ok, value is "y"
 table(checked_unbroken_words$is_ok)
+ #  ?   n   y 
+ # 24  32 244 
 # many of the exceptions can/should be fixed in wiktionary
 ```
 
-
-
-Also, for words that are not in the lookup, we can test the fall-through by evaluating a sample?
+About 10% of this sample was judged to be wrong (definitely should have a 
+breakdown), and about 10% was judged to be questionable (maybe should have a
+breakdown).
