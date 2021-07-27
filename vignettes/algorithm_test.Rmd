@@ -78,7 +78,7 @@ calc_score <- function(bd0, bd) {
   bd0 <- purrr::map(bd0, function(b) {b[b != "##"]} )
   bd <- purrr::map(bd, function(b) {b[b != "##"]} )
 
-  unlist(purrr::map2(bd0, bd, function(a, b) {
+  purrr::map2_dbl(bd0, bd, function(a, b) {
     re <- mean(a %in% b)
     pr <- mean(b %in% a)
     if (re == 0 & pr == 0) {
@@ -86,7 +86,7 @@ calc_score <- function(bd0, bd) {
     }
     f1 <- 2*re*pr / (re + pr)
     return(f1)
-    }))
+    })
 }
 
 
