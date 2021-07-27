@@ -91,6 +91,8 @@ calc_score <- function(bd0, bd) {
 
 
 scored <- wdtbl %>% 
+  # The filter helps focus on the difference between the two algorithms.
+  # To measure absolute performance, we'd take out this filter.
   filter(bd1 != bd2) %>% 
   mutate(score1 = calc_score(actual_bd, bd1)) %>% 
   mutate(score2 = calc_score(actual_bd, bd2))

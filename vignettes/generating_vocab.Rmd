@@ -63,6 +63,9 @@ common over all wiktionary words to get a prioritized list.
 # for much of this process, it's more convenient to have the processed words
 # unnested, with one morpheme per row. This takes a few minutes, so the unnest 
 # is memoised.
+# Currently, we're considering only words with pure lowercase latin characters.
+# We likely will want to also include the simplified version of words with
+# accented characters in this list. 
 unnested_processed_wiktionary <- unnest_pw(processed_wiktionary, clean = TRUE)
 
 # count how many wiktionary words each token appears in.
