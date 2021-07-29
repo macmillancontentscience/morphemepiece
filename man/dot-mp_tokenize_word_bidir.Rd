@@ -4,7 +4,7 @@
 \alias{.mp_tokenize_word_bidir}
 \title{Tokenize a Word Bidirectionally}
 \usage{
-.mp_tokenize_word_bidir(word, vocab)
+.mp_tokenize_word_bidir(word, vocab, allow_compounds = TRUE)
 }
 \arguments{
 \item{word}{Word to tokenize.}
@@ -12,6 +12,10 @@
 \item{vocab}{Named integer vector containing vocabulary words. Should have
 "vocab_split" attribute, with components named "prefixes", "words",
 "suffixes".}
+
+\item{allow_compounds}{Logical; whether to allow multiple whole words in the
+breakdown. Default is TRUE. This option will not be exposed to end users;
+it is kept here for documentation + development purposes.}
 }
 \value{
 Input word as a list of tokens.

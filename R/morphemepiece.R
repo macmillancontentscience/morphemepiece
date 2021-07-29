@@ -144,6 +144,8 @@ magrittr::`%>%`
 #'   Should have components named "prefixes", "words", "suffixes"
 #' @param dir Integer; if 1 (the default), look for tokens starting at the
 #'   beginning of the word. Otherwise, start at the end.
+#' @param allow_compounds Logical; whether to allow multiple whole words in the
+#'   breakdown.
 #' @param unk_token Token to represent unknown words.
 #' @param max_chars Maximum length of word recognized.
 #'
@@ -152,6 +154,7 @@ magrittr::`%>%`
 .mp_tokenize_word <- function(word, 
                               vocab_split, 
                               dir = 1, # -1 for backwards
+                              allow_compounds = TRUE,
                               unk_token = "[UNK]",
                               max_chars = 100) {
   if (nchar(word) > max_chars) {
@@ -170,16 +173,23 @@ magrittr::`%>%`
   wordlen <- nchar(word)
   end <- wordlen
   
+  word_allowed <- "XXX"
+  if (allow_compounds) {
+    # If "#" is allowed next, that counts as a word, but with a flag to
+    # insert the "##" token
+    word_allowed <- "#"
+  }
+  
   if (dir == 1) {
     # rules for what kind of token can follow what (prefix, word, suffix)
     allowed_next_rules <- list("p" = c("p", "w", "s"),
-                               "w" = "s",
+                               "w" = c("s", word_allowed),
                                "s" = "s")
     allowed_next <- c("p", "w")
   } else {
     # for backwards run
     allowed_next_rules <- list("s" = c("p", "w", "s"),
-                               "w" = "p",
+                               "w" = c("p", word_allowed),
                                "p" = "p")
     
     allowed_next <- c("s", "w")  
@@ -210,8 +220,16 @@ magrittr::`%>%`
         break
       }
       # finally, look for complete words, if allowed
-      if ("w" %in% allowed_next & sub_str %in% words) {
+      if (any(c("w", "#") %in% allowed_next) & sub_str %in% words) {
         cur_substr <- sub_str
+        # insert the frag_pat token in, if we're between complete words
+        if ("#" %in% allowed_next) {
+          if (dir == 1) {
+            cur_substr <- append(frag_pat, cur_substr)
+          } else {
+            cur_substr <- append(cur_substr, frag_pat)
+          }
+        }
         allowed_next <- allowed_next_rules[["w"]]
         break
       }
@@ -257,14 +275,23 @@ magrittr::`%>%`
 #' @param vocab Named integer vector containing vocabulary words. Should have
 #'   "vocab_split" attribute, with components named "prefixes", "words",
 #'   "suffixes".
-#'
+#' @param allow_compounds Logical; whether to allow multiple whole words in the
+#'   breakdown. Default is TRUE. This option will not be exposed to end users;
+#'   it is kept here for documentation + development purposes.
+#'   
 #' @return Input word as a list of tokens.
 #' @keywords internal
-.mp_tokenize_word_bidir <- function(word, vocab) {
+.mp_tokenize_word_bidir <- function(word, vocab, allow_compounds = TRUE) {
     vocab_split <- attr(vocab, "vocab_split")
-    t1 <- .mp_tokenize_word(word, vocab_split, dir = 1)
-    t2 <- .mp_tokenize_word(word, vocab_split, dir = -1)
-    if (length(t2) < length(t1) & length(t2) > 1) {
+    t1 <- .mp_tokenize_word(word, vocab_split, dir = 1,
+                            allow_compounds = allow_compounds)
+    t2 <- .mp_tokenize_word(word, vocab_split, dir = -1,
+                            allow_compounds = allow_compounds)
+    # Let's *not* count the ## token for purposes of deciding which breakdown
+    # to take. But we may want to come back to this, since it seemed to help.
+    t1_0 <- t1[t1 != "##"]
+    t2_0 <- t2[t2 != "##"]
+    if (length(t2_0) < length(t1_0) & length(t2) > 1) {
         return(t2)
     } else {
         return(t1)
