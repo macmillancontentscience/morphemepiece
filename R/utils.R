@@ -46,7 +46,7 @@
     Encoding(text) <- "UTF-8"
     return(text)
   } else {
-    stop("Unsupported string type.") #nocov
+    stop("Unsupported string type.") # nocov
   }
 }
 
@@ -84,17 +84,19 @@
   # Break apart accented characters so that the accents are separate characters
   # from the base letter ("é" -> "e", "´")
   text <- stringi::stri_trans_nfd(text)
-  
+
   return(
-    .apply_to_chars(text,
-                    function(char) {
-                      # This is the charclass for accents...
-                      if(stringi::stri_detect_charclass(char, "\\p{Mn}")) {
-                        # If a char is an accent, discard it.
-                        return("")
-                      }
-                      return(char)
-                    })
+    .apply_to_chars(
+      text,
+      function(char) {
+        # This is the charclass for accents...
+        if (stringi::stri_detect_charclass(char, "\\p{Mn}")) {
+          # If a char is an accent, discard it.
+          return("")
+        }
+        return(char)
+      }
+    )
   )
 }
 
@@ -115,15 +117,19 @@
   # Put a unique marker around each punctuation char, then split on the
   # marker (since we want the punctuation to be included in split).
   sep_marker <- "a!b"
-  output <- .apply_to_chars(text,
-                            function(char) {
-                              if(.is_punctuation(char)) {
-                                return(paste0(sep_marker,
-                                              char,
-                                              sep_marker))
-                              }
-                              return(char)
-                            })
+  output <- .apply_to_chars(
+    text,
+    function(char) {
+      if (.is_punctuation(char)) {
+        return(paste0(
+          sep_marker,
+          char,
+          sep_marker
+        ))
+      }
+      return(char)
+    }
+  )
   return(
     unlist(
       stringi::stri_split_fixed(output, sep_marker, omit_empty = TRUE)
@@ -144,14 +150,16 @@
 #' @keywords internal
 .tokenize_chinese_chars <- function(text) {
   return(
-    .apply_to_chars(text,
-                    function(char) {
-                      cp <- utf8ToInt(char)
-                      if(.is_chinese_char_cp(cp)) {
-                        return(paste0(" ", char, " ")) #nocov
-                      }
-                      return(char)
-                    })
+    .apply_to_chars(
+      text,
+      function(char) {
+        cp <- utf8ToInt(char)
+        if (.is_chinese_char_cp(cp)) {
+          return(paste0(" ", char, " ")) # nocov
+        }
+        return(char)
+      }
+    )
   )
 }
 
@@ -168,13 +176,13 @@
 #' @keywords internal
 .is_chinese_char_cp <- function(cp) {
   if ((cp >= 0x4E00 & cp <= 0x9FFF) |
-      (cp >= 0x3400 & cp <= 0x4DBF) |
-      (cp >= 0x20000 & cp <= 0x2A6DF) |
-      (cp >= 0x2A700 & cp <= 0x2B73F) |
-      (cp >= 0x2B740 & cp <= 0x2B81F) |
-      (cp >= 0x2B820 & cp <= 0x2CEAF) |
-      (cp >= 0xF900 & cp <= 0xFAFF) |
-      (cp >= 0x2F800 & cp <= 0x2FA1F)) {
+    (cp >= 0x3400 & cp <= 0x4DBF) |
+    (cp >= 0x20000 & cp <= 0x2A6DF) |
+    (cp >= 0x2A700 & cp <= 0x2B73F) |
+    (cp >= 0x2B740 & cp <= 0x2B81F) |
+    (cp >= 0x2B820 & cp <= 0x2CEAF) |
+    (cp >= 0xF900 & cp <= 0xFAFF) |
+    (cp >= 0x2F800 & cp <= 0x2FA1F)) {
     return(TRUE)
   }
   return(FALSE)
@@ -193,16 +201,18 @@
 #' @keywords internal
 .clean_text <- function(text) {
   return(
-    .apply_to_chars(text,
-                    function(char) {
-                      cp <- utf8ToInt(char)
-                      if (cp == 0 | cp == 0xfffd | .is_control(char)) {
-                        return("") #nocov
-                      } else if (.is_whitespace(char)) {
-                        return(" ")
-                      }
-                      return(char)
-                    })
+    .apply_to_chars(
+      text,
+      function(char) {
+        cp <- utf8ToInt(char)
+        if (cp == 0 | cp == 0xfffd | .is_control(char)) {
+          return("") # nocov
+        } else if (.is_whitespace(char)) {
+          return(" ")
+        }
+        return(char)
+      }
+    )
   )
 }
 
@@ -226,8 +236,8 @@
   if (stringi::stri_length(char) != 1L) { # nocov start
     stop("Parameter passed to .is_whitespace should be exactly one character.")
   } # nocov end
-  
-  
+
+
   if (char %in% c(" ", "\t", "\n", "\r")) {
     return(TRUE)
   }
@@ -250,7 +260,7 @@
   if (stringi::stri_length(char) != 1L) { # nocov start
     stop("Parameter passed to .is_control should be exactly one character.")
   } # nocov end
-  
+
   if (char %in% c(" ", "\t", "\n", "\r")) {
     return(FALSE)
   }
@@ -275,16 +285,16 @@
   if (stringi::stri_length(char) != 1L) { # nocov start
     stop("Parameter passed to .is_punctuation should be exactly one character.")
   } # nocov end
-  
+
   # Some punctuation-ish characters aren't actually in the Unicode "punctuation"
   # character class, so explicitly check the codepoint blocks containing them.
   # Also: https://www.regular-expressions.info/unicode.html
   cp <- utf8ToInt(char)
   if (
-    (cp >= 33 & cp <= 47) |  # !\"#$%&'()*+,-./
-    (cp >= 58 & cp <= 64) |  # :;<=>?@
-    (cp >= 91 & cp <= 96) |  # [\\]^_`
-    (cp >= 123 & cp <= 126)  # {|}~
+    (cp >= 33 & cp <= 47) | # !\"#$%&'()*+,-./
+      (cp >= 58 & cp <= 64) | # :;<=>?@
+      (cp >= 91 & cp <= 96) | # [\\]^_`
+      (cp >= 123 & cp <= 126) # {|}~
   ) {
     return(TRUE)
   }
@@ -348,13 +358,14 @@
 #'   vocabularies are also attached as attributes.
 #'
 #' @keywords internal
-.new_morphemepiece_vocabulary <- function(vocab, 
-                                          vocab_split, 
+.new_morphemepiece_vocabulary <- function(vocab,
+                                          vocab_split,
                                           is_cased) {
   return(structure(vocab,
-                   "vocab_split" = vocab_split,
-                   "is_cased" = is_cased,
-                   class = c("morphemepiece_vocabulary", "integer")))
+    "vocab_split" = vocab_split,
+    "is_cased" = is_cased,
+    class = c("morphemepiece_vocabulary", "integer")
+  ))
 }
 
 
