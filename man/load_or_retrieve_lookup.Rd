@@ -11,8 +11,8 @@ load_or_retrieve_lookup(
 )
 }
 \arguments{
-\item{lookup_file}{path to vocabulary file. File is assumed to be a text file,
-with one word per line. The lookup value, if different from the word,
+\item{lookup_file}{path to vocabulary file. File is assumed to be a text
+file, with one word per line. The lookup value, if different from the word,
 follows the word on the same line, after a space.}
 
 \item{use_cache}{Logical; if TRUE, will attempt to retrieve the lookup

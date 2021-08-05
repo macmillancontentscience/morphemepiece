@@ -7,7 +7,7 @@
 .mp_tokenize_word_bidir(word, vocab, allow_compounds = TRUE)
 }
 \arguments{
-\item{word}{Word to tokenize.}
+\item{word}{Character scalar; word to tokenize.}
 
 \item{vocab}{Named integer vector containing vocabulary words. Should have
 "vocab_split" attribute, with components named "prefixes", "words",
