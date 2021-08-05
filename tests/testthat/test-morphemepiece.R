@@ -40,13 +40,16 @@ test_that("lookup words tokenize as expected.", {
   lookup <- load_lookup(temp_lookup_path)
 
   test_result <- morphemepiece_tokenize(
-    text = "unaffable unable foxes running.",
+    text = c("unaffable unable foxes running.", "affable able fox runs"),
     vocab = vocab,
     lookup = lookup
   )
-  expected_result <- c(
-    `un##` = 3, affable = 4, `un##` = 3, able = 5, fox = 7, `##s` = 54,
-    run = 8, `##ing` = 9, `.` = 1
+  expected_result <- list(
+    c(
+      `un##` = 3L, affable = 4L, `un##` = 3L, able = 5L, fox = 7L, `##s` = 54L,
+      run = 8L, `##ing` = 9L, `.` = 1L
+    ),
+    c(affable = 4L, able = 5L, fox = 7L, run = 8L, `##s` = 54L)
   )
   expect_identical(test_result, expected_result)
 })

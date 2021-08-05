@@ -26,11 +26,14 @@ LazyData: true
 RoxygenNote: 7.1.1
 Roxygen: list(markdown = TRUE)
 Imports:
+    piecemaker (>= 0.1.0),
     dplyr (>= 1.0.4),
     purrr (>= 0.3.4),
     rappdirs (>= 0.3),
     stringi (>= 1.0),
     stringr (>= 1.4.0)
+Remotes:
+    macmillancontentscience/piecemaker
 Suggests:
     wordpiece,
     testthat (>= 3.0.0),
