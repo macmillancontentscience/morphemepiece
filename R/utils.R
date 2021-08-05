@@ -26,6 +26,8 @@
   if (is.null(x)) y else x # nocov
 }
 
+#' @importFrom rlang .data
+rlang::.data
 
 # .infer_case_from_vocab --------------------------------------------------
 

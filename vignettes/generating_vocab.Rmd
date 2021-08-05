@@ -71,7 +71,7 @@ unnested_processed_wiktionary <- unnest_pw(processed_wiktionary, clean = TRUE)
 # count how many wiktionary words each token appears in.
 token_counts <- get_token_counts(unnested_processed_wiktionary)
 
-head(token_counts) # top token is ##s, unsurprisingly
+utils::head(token_counts) # top token is ##s, unsurprisingly
 # # A tibble: 6 x 3
 #   token token_score  rank
 #   <chr>       <dbl> <int>
@@ -137,7 +137,7 @@ the wikitext-103 corpus:
 token_counts_weighted <- get_token_counts(unnested_processed_wiktionary, 
                                           word_freq_tab)
 # now the top token is "the", just because of how common that word is.
-head(token_counts_weighted)
+utils::head(token_counts_weighted)
 # # A tibble: 6 x 3
 #   token token_score  rank
 #   <chr>       <dbl> <int>
@@ -294,7 +294,7 @@ by the vocabularies:
 corpus_coverage_large %>% 
   filter(!covered) %>% 
   arrange(desc(word_count)) %>% 
-  head(10) %>% 
+  utils::head(10) %>% 
   select(word, word_count)
 
 # # A tibble: 10 x 2

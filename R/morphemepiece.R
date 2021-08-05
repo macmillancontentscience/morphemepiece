@@ -57,19 +57,21 @@ magrittr::`%>%`
   word <- stringr::str_remove_all(word, pattern = "#")
 
   match <- stringr::str_locate(string = word, pattern = mp_vocab_nohash) %>%
-    tibble::as_tibble() %>%
+    dplyr::as_tibble() %>%
     # need an index...
     dplyr::mutate(which_wp = dplyr::row_number()) %>%
     # take out any pieces *not* found in word
-    dplyr::filter(!is.na(start)) %>%
+    dplyr::filter(!is.na(.data$start)) %>%
     # full_token includes the ##
-    dplyr::mutate(full_token = names(mp_vocab_nohash)[which_wp]) %>%
-    dplyr::mutate(left_piece = stringr::str_sub(word,
+    dplyr::mutate(full_token = names(mp_vocab_nohash)[.data$which_wp]) %>%
+    dplyr::mutate(left_piece = stringr::str_sub(
+      .data$word,
       start = 1,
-      end = start - 1
+      end = .data$start - 1
     )) %>%
-    dplyr::mutate(right_piece = stringr::str_sub(word,
-      start = end + 1,
+    dplyr::mutate(right_piece = stringr::str_sub(
+      .data$word,
+      start = .data$end + 1,
       end = -1
     ))
 
@@ -82,36 +84,36 @@ magrittr::`%>%`
       # If this *is also* the original_start:
       match <- match %>%
         # ...if start == 1, the wordpiece must *not* start with ##.
-        dplyr::filter(start > 1 |
-          !stringr::str_starts(full_token,
+        dplyr::filter(.data$start > 1 |
+          !stringr::str_starts(.data$full_token,
             pattern = "##"
           ))
     }
     # ...if start != 1, The piece *must* start with ## OR the entire left
     # piece must be a valid prefix. Add the ## on that piece if so.
     match <- match %>%
-      dplyr::filter(start == 1 |
-        stringr::str_starts(full_token, pattern = "##") |
-        left_piece %in% names(prefixes))
+      dplyr::filter(.data$start == 1 |
+        stringr::str_starts(.data$full_token, pattern = "##") |
+          .data$left_piece %in% names(prefixes))
   } else {
     # If this is *not* a valid_start, the wordpiece must start with ##
     match <- match %>%
-      dplyr::filter(stringr::str_starts(full_token, pattern = "##"))
+      dplyr::filter(stringr::str_starts(.data$full_token, pattern = "##"))
   }
   if (original_end) {
     # if this is the end of the word, don't end in ##!
     match <- match %>%
-      dplyr::filter(right_piece != "" |
-        !stringr::str_ends(full_token, pattern = "##"))
+      dplyr::filter(.data$right_piece != "" |
+        !stringr::str_ends(.data$full_token, pattern = "##"))
   }
 
   match <- match %>%
-    dplyr::mutate(len = (end - start) + 1) %>%
+    dplyr::mutate(len = (.data$end - .data$start) + 1) %>%
     # Want ... longest matching piece, with ties broken by starting position
     # (earliest is better). This can still leave ties between base_words
     # and prefixes. I think we should prefer prefixes.
-    dplyr::arrange(-len, start, -nchar(full_token)) %>%
-    head(n = 1)
+    dplyr::arrange(-.data$len, .data$start, -nchar(.data$full_token)) %>%
+    utils::head(n = 1)
   if (nrow(match) != 1) {
     stop("hmm, this shouldn't happen in a complete vocabulary.")
   }
@@ -492,8 +494,8 @@ load_or_retrieve_vocab <- function(vocab_file,
 
 #' Load a morphemepiece lookup file
 #'
-#' @param lookup_file path to vocabulary file. File is assumed to be a text file,
-#'   with one word per line. The lookup value, if different from the word,
+#' @param lookup_file path to vocabulary file. File is assumed to be a text
+#'   file, with one word per line. The lookup value, if different from the word,
 #'   follows the word on the same line, after a space.
 #'
 #' @return The lookup as a named list. Names are words in lookup.

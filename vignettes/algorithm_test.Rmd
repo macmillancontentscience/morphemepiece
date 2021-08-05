@@ -70,7 +70,7 @@ for (word in words_to_do) {
 }
 
 actual_bd <- mp_lookup[words_to_do]
-wdtbl <- tibble::tibble(words_to_do, actual_bd, bd1 = unlist(breakdown1), bd2 = unlist(breakdown2))
+wdtbl <- dplyr::tibble(words_to_do, actual_bd, bd1 = unlist(breakdown1), bd2 = unlist(breakdown2))
 
 calc_score <- function(bd0, bd) {
   bd0 <- stringr::str_split(bd0, " ", simplify = FALSE)
