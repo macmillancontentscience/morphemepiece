@@ -1,7 +1,7 @@
 Package: morphemepiece
 Type: Package
 Title: Morpheme Tokenization
-Version: 0.0.4
+Version: 0.0.5
 Authors@R: c(
     person(given = "Jonathan",
            family = "Bratt",
@@ -27,17 +27,21 @@ RoxygenNote: 7.1.1
 Roxygen: list(markdown = TRUE)
 Imports:
     digest,
+    dlr,
     dplyr (>= 1.0.4),
     magrittr,
+    morphemepiece.data,
     piecemaker (>= 0.1.0),
     purrr (>= 0.3.4),
-    rappdirs (>= 0.3),
     rlang,
     stringr (>= 1.4.0),
     utils
 Remotes:
+    macmillancontentscience/dlr,
+    macmillancontentscience/morphemepiece.data,
     macmillancontentscience/piecemaker
 Suggests:
+    wikimorphemes,
     wordpiece,
     testthat (>= 3.0.0),
     knitr,

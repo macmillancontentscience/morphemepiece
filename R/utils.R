@@ -12,91 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# %||% ---------------------------------------------------------------------
-
-#' Default value for `NULL`
-#'
-#' Mostly copied from rlang package.
-#'
-#' @param x,y If `x` is NULL, will return `y`; otherwise returns `x`.
-#' @return Returns `x` if `x` is not NULL; otherwise returns `y`.
-#' @keywords internal
-#' @name op-null-default
-`%||%` <- function(x, y) {
-  if (is.null(x)) y else x # nocov
-}
-
-#' @importFrom rlang .data
-rlang::.data
-
-# .infer_case_from_vocab --------------------------------------------------
-
-#' Determine Vocabulary Casedness
-#'
-#' Determine whether or not a wordpiece vocabulary is case-sensitive.
-#'
-#' If none of the tokens in the vocabulary start with a capital letter, it will
-#' be assumed to be uncased. Note that tokens like "\\[CLS\\]" contain uppercase
-#' letters, but don't start with uppercase letters.
-#'
-#' @param vocab The vocabulary as a named integer vector.
-#' @return TRUE if the vocabulary is cased, FALSE if uncased.
-#'
-#' @keywords internal
-.infer_case_from_vocab <- function(vocab) {
-  is_cased <- any(grepl(pattern = "^[A-Z]", names(vocab)))
-  return(is_cased)
-}
-
-
-
-# .new_morphemepiece_vocabulary ------------------------------------------------
-
-#' Constructor for Class morphemepiece_vocabulary
-#'
-#' @param vocab Named integer vector; the "actual" vocabulary.
-#' @param vocab_split List of named integer vectors; the split vocabulary.
-#' @param is_cased Logical; whether the vocabulary is cased.
-#' @return The vocabulary with `is_cased` attached as an attribute, and the
-#'   class `morphemepiece_vocabulary` applied. The split and reversed
-#'   vocabularies are also attached as attributes.
-#'
-#' @keywords internal
-.new_morphemepiece_vocabulary <- function(vocab,
-                                          vocab_split,
-                                          is_cased) {
-  return(structure(vocab,
-    "vocab_split" = vocab_split,
-    "is_cased" = is_cased,
-    class = c("morphemepiece_vocabulary", "integer")
-  ))
-}
-
-
-
-# .validate_morphemepiece_vocabulary ------------------------------------------
-
-#' Validator for Objects of Class morphemepiece_vocabulary
-#'
-#' @param vocab morphemepiece_vocabulary object to validate
-#' @return \code{vocab} if the object passes the checks. Otherwise, abort with
-#'   message.
-#'
-#' @keywords internal
-.validate_morphemepiece_vocabulary <- function(vocab) {
-  if (length(vocab) == 0) {
-    stop("Empty vocabulary.")
-  }
-  tokens <- names(vocab)
-  if (anyDuplicated(tokens) > 0) {
-    stop("Duplicate tokens found in vocabulary.")
-  }
-  if (any(grepl("\\s", tokens))) {
-    stop("Whitespace found in vocabulary tokens.")
-  }
-  return(vocab)
-}
-
 # .make_cache_filename --------------------------------------------------
 
 #' Construct Cache File Name
@@ -116,15 +31,41 @@ rlang::.data
 }
 
 
-# get_cache_dir --------------------------------------------------
+# morphemepiece_cache_dir --------------------------------------------------
 
-#' Retrieve Directory for vocabulary Cache
+#' Retrieve Directory for Morphemepiece Cache
 #'
-#' @return A unique filename to use for cacheing the vocabulary.
+#' The morphemepiece cache directory is a platform- and user-specific path where
+#' morphemepiece saves caches (such as a downloaded lookup). You can override the
+#' default location in a few ways:
+#' \itemize{
+#'   \item{Option: \code{morphemepiece.dir}}{Use
+#'   \code{\link{set_morphemepiece_cache_dir}} to set a specific cache directory
+#'   for this session}
+#'   \item{Environment: \code{MORPHEMEPIECE_CACHE_DIR}}{Set this environment
+#'   variable to specify a morphemepiece cache directory for all sessions.}
+#'   \item{Environment: \code{R_USER_CACHE_DIR}}{Set this environment variable
+#'   to specify a cache directory root for all packages that use the caching
+#'   system.}
+#' }
+#'
+#' @return A character vector with the normalized path to the cache.
 #' @export
-get_cache_dir <- function() {
-  return(
-    getOption("morphemepiece.dir") %||%
-      rappdirs::user_cache_dir(appname = "morphemepiece")
-  )
+morphemepiece_cache_dir <- function() {
+  return(dlr::app_cache_dir("morphemepiece"))
+}
+
+#' Set a Cache Directory for Morphemepiece
+#'
+#' Use this function to override the cache path used by morphemepiece for the
+#' current session. Set the \code{MORPHEMEPIECE_CACHE_DIR} environment variable
+#' for a more permanent change.
+#'
+#' @param cache_dir Character scalar; a path to a cache directory.
+#'
+#' @return A normalized path to a cache directory. The directory is created if
+#'   the user has write access and the directory does not exist.
+#' @export
+set_morphemepiece_cache_dir <- function(cache_dir = NULL) {
+  return(dlr::set_app_cache_dir("morphemepiece", cache_dir))
 }
