@@ -278,7 +278,6 @@ load_or_retrieve_lookup <- function(lookup_file,
 }
 
 
-
 # .new_morphemepiece_vocabulary ------------------------------------------------
 
 #' Constructor for Class morphemepiece_vocabulary

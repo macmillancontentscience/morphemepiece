@@ -41,10 +41,11 @@ Remotes:
     macmillancontentscience/morphemepiece.data,
     macmillancontentscience/piecemaker
 Suggests:
-    wikimorphemes,
-    wordpiece,
-    testthat (>= 3.0.0),
+    here,
     knitr,
-    rmarkdown
+    rmarkdown,
+    testthat (>= 3.0.0),
+    wikimorphemes,
+    wordpiece.data
 VignetteBuilder: knitr
 Config/testthat/edition: 3
