@@ -10,6 +10,7 @@ vignette: >
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
+  eval = FALSE,
   comment = "#>"
 )
 ```
@@ -79,6 +80,15 @@ We rank tokens in order of frequency.
 We can also rank *words* in order of the maximum rank that their component tokens have. 
 This shows which words would be covered by a token vocabulary including tokens up to some rank.
 
+```{r temp-values, eval = TRUE, include = FALSE}
+# This is here so the package can still build properly when this vignette is
+# "turned off."
+words_vs_tokens <- list(
+  max_rank = 194347L,
+  n_words = 643745L
+)
+```
+
 ```{r token-ranks}
 # Some words process into "non-clean" tokens (diacrits, etc.).
 # Those tokens are excluded in token_counts, so will get an NA here.
@@ -91,16 +101,16 @@ words_with_max_token_ranks <- dplyr::left_join(
   token_counts, 
   by = "token"
 ) %>% 
-  dplyr::group_by(.data$word) %>% 
-  dplyr::summarize(max_rank = max(.data$rank)) %>% 
-  dplyr::filter(!is.na(.data$max_rank))
+  dplyr::group_by(word) %>% 
+  dplyr::summarize(max_rank = max(rank)) %>% 
+  dplyr::filter(!is.na(max_rank))
 
 # Count how many total words are covered by tokens up to some rank:
 words_vs_tokens <- words_with_max_token_ranks %>% 
-  dplyr::group_by(.data$max_rank) %>% 
-  dplyr::summarize(n_words = dplyr::n_distinct(.data$word)) %>% 
-  dplyr::arrange(.data$max_rank) %>% 
-  dplyr::mutate(n_words = cumsum(.data$n_words))
+  dplyr::group_by(max_rank) %>% 
+  dplyr::summarize(n_words = dplyr::n_distinct(word)) %>% 
+  dplyr::arrange(max_rank) %>% 
+  dplyr::mutate(n_words = cumsum(n_words))
 ```
 
 There are `r max(words_vs_tokens$max_rank)` distinct tokens and `r max(words_vs_tokens$n_words)` distinct words.
@@ -108,9 +118,9 @@ There are `r max(words_vs_tokens$max_rank)` distinct tokens and `r max(words_vs_
 ```{r plot-counts}
 # plot!
 words_vs_tokens %>% 
-  dplyr::mutate(frac_words = .data$n_words/max(.data$n_words)) %>% 
-  dplyr::mutate(frac_tokens = .data$max_rank/max(.data$max_rank)) %>% 
-  ggplot2::ggplot(ggplot2::aes(x = .data$frac_tokens, y = .data$frac_words)) + 
+  dplyr::mutate(frac_words = n_words/max(n_words)) %>% 
+  dplyr::mutate(frac_tokens = max_rank/max(max_rank)) %>% 
+  ggplot2::ggplot(ggplot2::aes(x = frac_tokens, y = frac_words)) + 
   ggplot2::geom_point() 
 
 ```
@@ -140,9 +150,9 @@ words_with_max_token_ranks_weighted <- dplyr::left_join(
   token_counts_weighted, 
   by = "token"
 ) %>% 
-  dplyr::group_by(.data$word) %>% 
-  dplyr::summarize(max_rank = max(.data$rank)) %>% 
-  dplyr::filter(!is.na(.data$max_rank))
+  dplyr::group_by(word) %>% 
+  dplyr::summarize(max_rank = max(rank)) %>% 
+  dplyr::filter(!is.na(max_rank))
 
 weighted_tokens_and_words <- dplyr::left_join(
   words_with_max_token_ranks_weighted,
@@ -151,23 +161,23 @@ weighted_tokens_and_words <- dplyr::left_join(
 ) %>% 
   dplyr::mutate(
     word_count = ifelse(
-      test = is.na(.data$word_count), 
+      test = is.na(word_count), 
       yes = 1L, 
-      no = .data$word_count
+      no = word_count
     )
   )
 
 words_vs_tokens_weighted <- weighted_tokens_and_words %>% 
-  dplyr::group_by(.data$max_rank) %>% 
-  dplyr::summarize(n_words = sum(.data$word_count)) %>% 
-  dplyr::arrange(.data$max_rank) %>% 
-  dplyr::mutate(n_words = cumsum(.data$n_words))
+  dplyr::group_by(max_rank) %>% 
+  dplyr::summarize(n_words = sum(word_count)) %>% 
+  dplyr::arrange(max_rank) %>% 
+  dplyr::mutate(n_words = cumsum(n_words))
 
 # plot!
 words_vs_tokens_weighted %>% 
-  dplyr::mutate(frac_words = .data$n_words/max(.data$n_words)) %>% 
-  dplyr::mutate(frac_tokens = .data$max_rank/max(.data$max_rank)) %>% 
-  ggplot2::ggplot(ggplot2::aes(x = .data$frac_tokens, y = .data$frac_words)) + 
+  dplyr::mutate(frac_words = n_words/max(n_words)) %>% 
+  dplyr::mutate(frac_tokens = max_rank/max(max_rank)) %>% 
+  ggplot2::ggplot(ggplot2::aes(x = frac_tokens, y = frac_words)) + 
   ggplot2::geom_point() 
 ```
 
@@ -264,14 +274,14 @@ corpus_coverage_small <- dplyr::left_join(
   vandl_small$lookup, 
   by = "word"
 ) %>% 
-  dplyr::mutate(covered_lookup = !is.na(.data$tokenization)) %>% 
+  dplyr::mutate(covered_lookup = !is.na(tokenization)) %>% 
   # not every word in the vocab is in the lookup; check vocab too
-  dplyr::mutate(covered_vocab = .data$word %in% vandl_small$vocab) %>% 
-  dplyr::mutate(covered = .data$covered_lookup | .data$covered_vocab) %>% 
-  dplyr::mutate(covered_weighted = .data$covered*.data$word_count) 
+  dplyr::mutate(covered_vocab = word %in% vandl_small$vocab) %>% 
+  dplyr::mutate(covered = covered_lookup | covered_vocab) %>% 
+  dplyr::mutate(covered_weighted = covered*word_count) 
 
 corpus_coverage_small %>% 
-  dplyr::summarize(sum(.data$covered_weighted)/sum(.data$word_count))
+  dplyr::summarize(sum(covered_weighted)/sum(word_count))
 ```
 
 The "small" vocabulary covers 95% of words from the corpus, weighted by usage. 
@@ -282,14 +292,14 @@ corpus_coverage_large <- dplyr::left_join(
   vandl_large$lookup, 
   by = "word"
 ) %>% 
-  dplyr::mutate(covered_lookup = !is.na(.data$tokenization)) %>% 
+  dplyr::mutate(covered_lookup = !is.na(tokenization)) %>% 
   # not every word in the vocab is in the lookup; check vocab too
-  dplyr::mutate(covered_vocab = .data$word %in% vandl_large$vocab) %>% 
-  dplyr::mutate(covered = .data$covered_lookup | .data$covered_vocab) %>% 
-  dplyr::mutate(covered_weighted = .data$covered*.data$word_count) 
+  dplyr::mutate(covered_vocab = word %in% vandl_large$vocab) %>% 
+  dplyr::mutate(covered = covered_lookup | covered_vocab) %>% 
+  dplyr::mutate(covered_weighted = covered*word_count) 
 
 corpus_coverage_large %>% 
-  dplyr::summarize(sum(.data$covered_weighted)/sum(.data$word_count))
+  dplyr::summarize(sum(covered_weighted)/sum(word_count))
 ```
 
 The "large" vocabulary covers 96.5% of words, 1.5% more words (weighted) than the "small" vocabulary. 
@@ -299,10 +309,10 @@ It is useful to look at the most common words that are *not* covered by the voca
 ```{r show-coverage-large}
 #large
 corpus_coverage_large %>% 
-  dplyr::filter(!.data$covered) %>% 
-  dplyr::arrange(dplyr::desc(.data$word_count)) %>% 
+  dplyr::filter(!covered) %>% 
+  dplyr::arrange(dplyr::desc(word_count)) %>% 
   utils::head(10) %>% 
-  dplyr::select(.data$word, .data$word_count)
+  dplyr::select(word, word_count)
 ```
 
 Our process (as of August 2021) has a hole: abbreviations such as "km" and "cm" really should be in the vocabulary, but they are missing due to not having an "English" section in Wiktionary.

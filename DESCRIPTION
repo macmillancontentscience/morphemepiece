@@ -28,19 +28,20 @@ Roxygen: list(markdown = TRUE)
 Imports:
     digest,
     dlr,
-    dplyr (>= 1.0.4),
     magrittr,
     morphemepiece.data,
-    piecemaker (>= 0.1.0),
+    piecemaker (>= 1.0.0),
     purrr (>= 0.3.4),
     rlang,
     stringr (>= 1.4.0),
     utils
 Remotes:
     macmillancontentscience/dlr,
-    macmillancontentscience/morphemepiece.data,
-    macmillancontentscience/piecemaker
+    macmillancontentscience/morphemepiece.data
 Suggests:
+    dplyr,
+    fs,
+    ggplot2,
     here,
     knitr,
     rmarkdown,

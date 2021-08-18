@@ -6,6 +6,8 @@
 \alias{\%>\%}
 \alias{.data}
 \alias{\%||\%}
+\alias{morphemepiece_vocab}
+\alias{morphemepiece_lookup}
 \title{Objects exported from other packages}
 \keyword{internal}
 \description{
@@ -14,6 +16,8 @@ below to see their documentation.
 
 \describe{
   \item{magrittr}{\code{\link[magrittr:pipe]{\%>\%}}}
+
+  \item{morphemepiece.data}{\code{\link[morphemepiece.data]{morphemepiece_lookup}}, \code{\link[morphemepiece.data]{morphemepiece_vocab}}}
 
   \item{rlang}{\code{\link[rlang:op-null-default]{\%||\%}}, \code{\link[rlang:tidyeval-data]{.data}}}
 }}

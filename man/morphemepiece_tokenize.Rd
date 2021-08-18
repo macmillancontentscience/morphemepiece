@@ -6,8 +6,8 @@
 \usage{
 morphemepiece_tokenize(
   text,
-  vocab = morphemepiece.data::morphemepiece_vocab(),
-  lookup = morphemepiece.data::morphemepiece_lookup(),
+  vocab = morphemepiece_vocab(),
+  lookup = morphemepiece_lookup(),
   unk_token = "[UNK]",
   max_chars = 100
 )

@@ -22,3 +22,11 @@ rlang::.data
 
 #' @importFrom rlang %||%
 rlang::`%||%`
+
+#' @importFrom morphemepiece.data morphemepiece_vocab
+#' @export
+morphemepiece.data::morphemepiece_vocab
+
+#' @importFrom morphemepiece.data morphemepiece_lookup
+#' @export
+morphemepiece.data::morphemepiece_lookup

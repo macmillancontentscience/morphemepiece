@@ -36,8 +36,8 @@
 #' Retrieve Directory for Morphemepiece Cache
 #'
 #' The morphemepiece cache directory is a platform- and user-specific path where
-#' morphemepiece saves caches (such as a downloaded lookup). You can override the
-#' default location in a few ways:
+#' morphemepiece saves caches (such as a downloaded lookup). You can override
+#' the default location in a few ways:
 #' \itemize{
 #'   \item{Option: \code{morphemepiece.dir}}{Use
 #'   \code{\link{set_morphemepiece_cache_dir}} to set a specific cache directory

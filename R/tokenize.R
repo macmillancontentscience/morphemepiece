@@ -260,10 +260,10 @@
 #' integer vector, as in the wordpiece package.)
 #' @export
 morphemepiece_tokenize <- function(text,
-                            vocab = morphemepiece.data::morphemepiece_vocab(),
-                            lookup = morphemepiece.data::morphemepiece_lookup(),
-                            unk_token = "[UNK]",
-                            max_chars = 100) {
+                                   vocab = morphemepiece_vocab(),
+                                   lookup = morphemepiece_lookup(),
+                                   unk_token = "[UNK]",
+                                   max_chars = 100) {
   is_cased <- attr(vocab, "is_cased")
   if (!is_cased) {
     text <- tolower(text)
