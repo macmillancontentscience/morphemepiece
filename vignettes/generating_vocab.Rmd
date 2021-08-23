@@ -25,12 +25,12 @@ library(purrr)
 ```
 
 This vignette shows how to use the processed words from the {wikimorphemes}
-package to create a {morphemepiece} vocabulary and lookup table.
+package to create a morphemepiece vocabulary and lookup table.
 
-To make a {morphemepiece} vocabulary, start with...
+To make a morphemepiece vocabulary, start with...
 
- - a {wordpiece} vocabulary
- - a processed {wikimorphemes} cache
+ - a wordpiece vocabulary
+ - a processed wikimorphemes cache
  - (optionally) a word frequency table derived from some corpus.
 
 ```{r load-data}
@@ -125,8 +125,8 @@ words_vs_tokens %>%
 
 ```
 
-Note that only about 5% of the morpheme tokens (out of about 189K) are needed to 
-cover about 50% of the words (out of about 638K).
+Note that only about 5% of the morpheme tokens (out of about 194K) are needed to 
+cover about 50% of the words (out of about 644K).
 
 The plot above weights each word equally, no matter how frequently that word occurs.
 To get a sense of word coverage by actual usage, we can weight each word by how often it occurs in some corpus. 
@@ -185,15 +185,15 @@ The top 5% of tokens would cover over 98% of words by usage.
 
 Now we make an actual vocabulary and lookup.
 
-We construct a {morphemepiece} vocabulary, starting from a {wordpiece} vocabulary.
-The constructed vocabulary contains the same "fancy" tokens as {wordpiece} (punctuation, etc.), but replaces most (non-short, non-proper-noun) words with their morpheme tokens. 
+We construct a morphemepiece vocabulary, starting from a wordpiece vocabulary.
+The constructed vocabulary contains the same "fancy" tokens as wordpiece (punctuation, etc.), but replaces most (non-short, non-proper-noun) words with their morpheme tokens. 
 This process generally results in a core vocabulary with about 16K tokens. 
 
 If our target vocabulary size is larger than this, additional tokens are added from the (ranked) list of tokens.
 
 The lookup contains every word in the wikipedia word list which is covered by (processes into) the tokens in the vocabulary.
 
-Here, let's make two vocabularies: one "small" (minimum to roughly cover the {wordpiece} vocabulary) and one "large" (comparable to the size of the {wordpiece} vocabulary).
+Here, let's make two vocabularies: one "small" (minimum to roughly cover the wordpiece vocabulary) and one "large" (comparable to the size of the wordpiece vocabulary).
 
 ```{r make-vocabs}
 vandl_small <- make_vocab_and_lookup(
@@ -320,7 +320,7 @@ We'll address this in a future update.
 
 Other categories of uncovered words include some proper nouns, words with diacritical marks, and partial contractions (like "didn").
 
-The word "los" in this list raises an interesting question for future consideration: should a small set of common words in languages besides English be included? After all, a significant number of tokens in both {wordpiece} and {morphemepiece} are currently used for Asian language characters.
+The word "los" in this list raises an interesting question for future consideration: should a small set of common words in languages besides English be included? After all, a significant number of tokens in both wordpiece and morphemepiece are currently used for Asian language characters.
 
 ## Other measures of coverage quality
 
