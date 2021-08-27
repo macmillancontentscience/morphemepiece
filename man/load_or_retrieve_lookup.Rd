@@ -4,23 +4,12 @@
 \alias{load_or_retrieve_lookup}
 \title{Load a lookup file, or retrieve from cache}
 \usage{
-load_or_retrieve_lookup(
-  lookup_file,
-  use_cache = TRUE,
-  cache_dir = morphemepiece_cache_dir()
-)
+load_or_retrieve_lookup(lookup_file)
 }
 \arguments{
 \item{lookup_file}{path to vocabulary file. File is assumed to be a text
 file, with one word per line. The lookup value, if different from the word,
 follows the word on the same line, after a space.}
-
-\item{use_cache}{Logical; if TRUE, will attempt to retrieve the lookup
-from the specified cache location, or, if not found there, will ask to save
-the lookup as an .rds file.}
-
-\item{cache_dir}{Character; the path to a cache directory (defaults to
-location returned by \code{morphemepiece_cache_dir()}).}
 }
 \value{
 The lookup table as a named character vector.

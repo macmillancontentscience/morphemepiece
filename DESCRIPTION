@@ -27,14 +27,13 @@ RoxygenNote: 7.1.1
 Roxygen: list(markdown = TRUE)
 Imports:
     digest,
-    dlr,
+    dlr (>= 0.0.1),
     magrittr,
     morphemepiece.data,
     piecemaker (>= 1.0.0),
     purrr (>= 0.3.4),
     rlang,
-    stringr (>= 1.4.0),
-    utils
+    stringr (>= 1.4.0)
 Remotes:
     macmillancontentscience/dlr,
     macmillancontentscience/morphemepiece.data
@@ -46,6 +45,7 @@ Suggests:
     knitr,
     rmarkdown,
     testthat (>= 3.0.0),
+    utils,
     wikimorphemes,
     wordpiece.data
 VignetteBuilder: knitr

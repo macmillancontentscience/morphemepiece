@@ -89,11 +89,6 @@ prepare_vocab <- function(token_list) {
 #' Load a vocabulary file, or retrieve from cache
 #'
 #' @inheritParams load_vocab
-#' @param use_cache Logical; if TRUE, will attempt to retrieve the vocabulary
-#'   from the specified cache location, or, if not found there, will ask to save
-#'   the vocabulary as an .rds file.
-#' @param cache_dir Character; the path to a cache directory (defaults to
-#'   location returned by `morphemepiece_cache_dir()`).
 #'
 #' @return The vocab as a list of named integer vectors. Names are tokens in
 #'   vocabulary, values are integer indices. The casedness of the vocabulary is
@@ -108,15 +103,12 @@ prepare_vocab <- function(token_list) {
 #'
 #' @examples
 #' # todo, after I make tiny sample vocab to include
-load_or_retrieve_vocab <- function(vocab_file,
-                                   use_cache = TRUE,
-                                   cache_dir = morphemepiece_cache_dir()) {
+load_or_retrieve_vocab <- function(vocab_file) {
   return(
-    .load_or_retrieve_file(
-      vocab_file,
-      load_vocab,
-      use_cache,
-      cache_dir
+    dlr::read_or_cache(
+      source_path = vocab_file,
+      appname = "morphemepiece",
+      process_f = load_vocab
     )
   )
 }
@@ -155,16 +147,10 @@ load_lookup <- function(lookup_file) {
 
 
 # load_or_retrieve_lookup ------------------------------------------------------
-# generalize vocab function to do both
 
 #' Load a lookup file, or retrieve from cache
 #'
 #' @inheritParams load_lookup
-#' @param use_cache Logical; if TRUE, will attempt to retrieve the lookup
-#'   from the specified cache location, or, if not found there, will ask to save
-#'   the lookup as an .rds file.
-#' @param cache_dir Character; the path to a cache directory (defaults to
-#'   location returned by `morphemepiece_cache_dir()`).
 #'
 #' @return The lookup table as a named character vector.
 #'
@@ -172,68 +158,14 @@ load_lookup <- function(lookup_file) {
 #'
 #' @examples
 #' # todo, after I make tiny sample vocab to include
-load_or_retrieve_lookup <- function(lookup_file,
-                                    use_cache = TRUE,
-                                    cache_dir = morphemepiece_cache_dir()) {
+load_or_retrieve_lookup <- function(lookup_file) {
   return(
-    .load_or_retrieve_file(
-      lookup_file,
-      load_lookup,
-      use_cache,
-      cache_dir
+    dlr::read_or_cache(
+      source_path = lookup_file,
+      appname = "morphemepiece",
+      process_f = load_lookup
     )
   )
-}
-
-
-# .load_or_retrieve_file ------------------------------------------------------
-
-#' Load a vocab or lookup file, or retrieve from cache
-#'
-#' @param file Character; path to file to load.
-#' @param load_function Function to call to load vocabulary or lookup from txt.
-#' @param use_cache Logical; if TRUE, will attempt to retrieve the vocab or
-#'   lookup table from the specified cache location, or, if not found there,
-#'   will ask to save the vocabulary or lookup as an .rds file.
-#' @param cache_dir Character; the path to a cache directory (defaults to
-#'   location returned by `morphemepiece_cache_dir()`).
-#'
-#' @return The lookup table or vocabulary as returned by `load_function`.
-#'
-#' @keywords internal
-.load_or_retrieve_file <- function(file,
-                                   load_function,
-                                   use_cache = TRUE,
-                                   cache_dir = morphemepiece_cache_dir()) {
-  if (use_cache) {
-    cache_filepath <- file.path(
-      cache_dir,
-      .make_cache_filename(file)
-    )
-    if (file.exists(cache_filepath)) {
-      return(readRDS(cache_filepath)) # nocov
-    }
-  }
-  # Guess we have to load the vocab or lookup from text file.
-  contents <- load_function(file)
-
-  if (use_cache) { # nocov start
-    # ask for permission to write to cache
-    if (interactive()) {
-      if (isTRUE(utils::askYesNo(paste0(
-        "Cache contents at ",
-        cache_filepath, "?"
-      )))) {
-        # make sure that the directory exists
-        if (!dir.exists(cache_dir)) {
-          # probably should invalidate the cache across package versions
-          dir.create(path = cache_dir, recursive = TRUE)
-        }
-        saveRDS(contents, cache_filepath)
-      }
-    }
-  } # nocov end
-  return(contents)
 }
 
 

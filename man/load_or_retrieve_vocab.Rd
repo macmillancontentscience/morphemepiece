@@ -4,23 +4,12 @@
 \alias{load_or_retrieve_vocab}
 \title{Load a vocabulary file, or retrieve from cache}
 \usage{
-load_or_retrieve_vocab(
-  vocab_file,
-  use_cache = TRUE,
-  cache_dir = morphemepiece_cache_dir()
-)
+load_or_retrieve_vocab(vocab_file)
 }
 \arguments{
 \item{vocab_file}{path to vocabulary file. File is assumed to be a text file,
 with one token per line, with the line number (starting at zero)
 corresponding to the index of that token in the vocabulary.}
-
-\item{use_cache}{Logical; if TRUE, will attempt to retrieve the vocabulary
-from the specified cache location, or, if not found there, will ask to save
-the vocabulary as an .rds file.}
-
-\item{cache_dir}{Character; the path to a cache directory (defaults to
-location returned by \code{morphemepiece_cache_dir()}).}
 }
 \value{
 The vocab as a list of named integer vectors. Names are tokens in
