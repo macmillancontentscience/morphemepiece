@@ -15,13 +15,7 @@ follows the word on the same line, after a space.}
 The lookup as a named list. Names are words in lookup.
 }
 \description{
-Load a morphemepiece lookup file
-}
-\examples{
-# {morphemepiece} comes with a lookup that can be accessed via
-# `morphemepiece_lookup()`. 
-# This function can be used to load a different lookup from a file.
-\dontrun{
-vocab <- load_lookup("path/to/file/lookup.txt")
-}
+{morphemepiece} comes with a lookup that can be accessed via
+\code{morphemepiece_lookup()}. This function can be used to load a different
+lookup from a file.
 }

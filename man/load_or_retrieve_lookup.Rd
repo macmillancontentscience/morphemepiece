@@ -15,14 +15,7 @@ follows the word on the same line, after a space.}
 The lookup table as a named character vector.
 }
 \description{
-Load a lookup file, or retrieve from cache
-}
-\examples{
-# {morphemepiece} comes with a lookup that can be accessed via
-# `morphemepiece_lookup()`. 
-# This function can be used to load (and cache) a different lookup from a 
-# file.
-\dontrun{
-vocab <- load_or_retrieve_lookup("path/to/file/lookup.txt")
-}
+{morphemepiece} comes with a lookup that can be accessed via
+\code{morphemepiece_lookup()}. This function can be used to load (and cache) a
+different lookup from a file.
 }
