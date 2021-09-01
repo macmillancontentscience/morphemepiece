@@ -167,21 +167,27 @@
 #' @param vocab Named integer vector containing vocabulary words. Should have
 #'   "vocab_split" attribute, with components named "prefixes", "words",
 #'   "suffixes".
+#' @param max_chars Maximum length of word recognized.
 #' @param allow_compounds Logical; whether to allow multiple whole words in the
 #'   breakdown. Default is TRUE. This option will not be exposed to end users;
 #'   it is kept here for documentation + development purposes.
 #'
 #' @return Input word as a list of tokens.
 #' @keywords internal
-.mp_tokenize_word_bidir <- function(word, vocab, allow_compounds = TRUE) {
+.mp_tokenize_word_bidir <- function(word, 
+                                    vocab, 
+                                    max_chars, 
+                                    allow_compounds = TRUE) {
   vocab_split <- attr(vocab, "vocab_split")
   t1 <- .mp_tokenize_word(word, vocab_split,
     dir = 1,
-    allow_compounds = allow_compounds
+    allow_compounds = allow_compounds,
+    max_chars = max_chars
   )
   t2 <- .mp_tokenize_word(word, vocab_split,
     dir = -1,
-    allow_compounds = allow_compounds
+    allow_compounds = allow_compounds,
+    max_chars = max_chars
   )
   # Let's *not* count the ## token for purposes of deciding which breakdown
   # to take. But we may want to come back to this, since it seemed to help.
@@ -204,14 +210,15 @@
 #'
 #' @return A named integer vector of tokenized words.
 #' @keywords internal
-.mp_tokenize_single_string <- function(words, vocab, lookup) {
+.mp_tokenize_single_string <- function(words, vocab, lookup, max_chars) {
   return(
     unlist(
       purrr::map(
         words,
         .f = .mp_tokenize_word_lookup,
         vocab = vocab,
-        lookup = lookup
+        lookup = lookup,
+        max_chars = max_chars
       )
     )
   )
@@ -228,7 +235,7 @@
 #'
 #' @return Input word, broken into tokens.
 #' @keywords internal
-.mp_tokenize_word_lookup <- function(word, vocab, lookup) {
+.mp_tokenize_word_lookup <- function(word, vocab, lookup, max_chars) {
   if (word %in% names(vocab)) { # punctuation, etc.
     return(vocab[word])
   }
@@ -239,7 +246,7 @@
     breakdown <- lookup[[word]]
     token_list <- stringr::str_split(breakdown, pattern = " ")[[1]]
   } else {
-    token_list <- .mp_tokenize_word_bidir(word, vocab)
+    token_list <- .mp_tokenize_word_bidir(word, vocab, max_chars)
   }
   return(vocab[token_list])
 }
@@ -279,11 +286,8 @@ morphemepiece_tokenize <- function(text,
     text,
     .f = .mp_tokenize_single_string,
     vocab = vocab,
-    lookup = lookup
+    lookup = lookup,
+    max_chars = max_chars
   )
   return(text)
-  #  For testing on datascience:
-  # mp_vocab <- load_or_retrieve_vocab("/shared/morphemepiece_vocabs/mp_vocab_big.txt")
-  # mp_lookup <- load_or_retrieve_lookup("/shared/morphemepiece_vocabs/mp_lookup_big.txt")
-  # morphemepiece_tokenize("I love tacos! And prexxxxationings", mp_vocab, mp_lookup)
 }

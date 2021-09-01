@@ -4,7 +4,7 @@
 \alias{.mp_tokenize_word_bidir}
 \title{Tokenize a Word Bidirectionally}
 \usage{
-.mp_tokenize_word_bidir(word, vocab, allow_compounds = TRUE)
+.mp_tokenize_word_bidir(word, vocab, max_chars, allow_compounds = TRUE)
 }
 \arguments{
 \item{word}{Character scalar; word to tokenize.}
@@ -12,6 +12,8 @@
 \item{vocab}{Named integer vector containing vocabulary words. Should have
 "vocab_split" attribute, with components named "prefixes", "words",
 "suffixes".}
+
+\item{max_chars}{Maximum length of word recognized.}
 
 \item{allow_compounds}{Logical; whether to allow multiple whole words in the
 breakdown. Default is TRUE. This option will not be exposed to end users;
