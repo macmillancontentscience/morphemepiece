@@ -25,5 +25,11 @@ is stored as a named integer vector, and why it starts with index zero.
 Load a vocabulary file, or retrieve from cache
 }
 \examples{
-# todo, after I make tiny sample vocab to include
+# {morphemepiece} comes with a vocabulary that can be accessed via
+# `morphemepiece_vocab()`. 
+# This function can be used to load (and cache) a different vocabulary from a
+# file.
+\dontrun{
+vocab <- load_or_retrieve_vocab("path/to/file/vocab.txt")
+}
 }

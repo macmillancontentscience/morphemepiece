@@ -26,5 +26,10 @@ starts with index zero.
 Load a vocabulary file
 }
 \examples{
-# todo, after I make tiny sample vocab to include
+# {morphemepiece} comes with a vocabulary that can be accessed via
+# `morphemepiece_vocab()`. 
+# This function can be used to load a different vocabulary from a file.
+\dontrun{
+vocab <- load_vocab("path/to/file/vocab.txt")
+}
 }

@@ -33,7 +33,12 @@
 #' @export
 #'
 #' @examples
-#' # todo, after I make tiny sample vocab to include
+#' # {morphemepiece} comes with a vocabulary that can be accessed via
+#' # `morphemepiece_vocab()`. 
+#' # This function can be used to load a different vocabulary from a file.
+#' \dontrun{
+#' vocab <- load_vocab("path/to/file/vocab.txt")
+#' }
 load_vocab <- function(vocab_file) {
   token_list <- readLines(vocab_file)
 
@@ -102,7 +107,13 @@ prepare_vocab <- function(token_list) {
 #' @export
 #'
 #' @examples
-#' # todo, after I make tiny sample vocab to include
+#' # {morphemepiece} comes with a vocabulary that can be accessed via
+#' # `morphemepiece_vocab()`. 
+#' # This function can be used to load (and cache) a different vocabulary from a
+#' # file.
+#' \dontrun{
+#' vocab <- load_or_retrieve_vocab("path/to/file/vocab.txt")
+#' }
 load_or_retrieve_vocab <- function(vocab_file) {
   return(
     dlr::read_or_cache(
@@ -128,7 +139,12 @@ load_or_retrieve_vocab <- function(vocab_file) {
 #' @export
 #'
 #' @examples
-#' # todo, after I make tiny sample vocab to include
+#' # {morphemepiece} comes with a lookup that can be accessed via
+#' # `morphemepiece_lookup()`. 
+#' # This function can be used to load a different lookup from a file.
+#' \dontrun{
+#' vocab <- load_lookup("path/to/file/lookup.txt")
+#' }
 load_lookup <- function(lookup_file) {
   lookup_lines <- readLines(lookup_file)
   # patch for now; fix in wikimorphemes (see "blithely" "fidget" "cyber")
@@ -157,7 +173,13 @@ load_lookup <- function(lookup_file) {
 #' @export
 #'
 #' @examples
-#' # todo, after I make tiny sample vocab to include
+#' # {morphemepiece} comes with a lookup that can be accessed via
+#' # `morphemepiece_lookup()`. 
+#' # This function can be used to load (and cache) a different lookup from a 
+#' # file.
+#' \dontrun{
+#' vocab <- load_or_retrieve_lookup("path/to/file/lookup.txt")
+#' }
 load_or_retrieve_lookup <- function(lookup_file) {
   return(
     dlr::read_or_cache(

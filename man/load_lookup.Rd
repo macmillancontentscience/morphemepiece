@@ -18,5 +18,10 @@ The lookup as a named list. Names are words in lookup.
 Load a morphemepiece lookup file
 }
 \examples{
-# todo, after I make tiny sample vocab to include
+# {morphemepiece} comes with a lookup that can be accessed via
+# `morphemepiece_lookup()`. 
+# This function can be used to load a different lookup from a file.
+\dontrun{
+vocab <- load_lookup("path/to/file/lookup.txt")
+}
 }
