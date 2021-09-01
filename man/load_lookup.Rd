@@ -15,7 +15,7 @@ follows the word on the same line, after a space.}
 The lookup as a named list. Names are words in lookup.
 }
 \description{
-{morphemepiece} comes with a lookup that can be accessed via
+Usually you will want to use the included lookup that can be accessed via
 \code{morphemepiece_lookup()}. This function can be used to load a different
 lookup from a file.
 }

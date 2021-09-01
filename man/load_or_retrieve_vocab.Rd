@@ -22,7 +22,7 @@ indexing, it would break any pre-trained models. This is why the vocabulary
 is stored as a named integer vector, and why it starts with index zero.
 }
 \description{
-{morphemepiece} comes with a vocabulary that can be accessed via
+Usually you will want to use the included vocabulary that can be accessed via
 \code{morphemepiece_vocab()}. This function can be used to load (and cache) a
 different vocabulary from a file.
 }

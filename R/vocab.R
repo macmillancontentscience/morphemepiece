@@ -16,7 +16,7 @@
 
 #' Load a vocabulary file
 #' 
-#' {morphemepiece} comes with a vocabulary that can be accessed via
+#' Usually you will want to use the included vocabulary that can be accessed via
 #' `morphemepiece_vocab()`. This function can be used to load a different
 #' vocabulary from a file.
 #'
@@ -89,7 +89,7 @@ prepare_vocab <- function(token_list) {
 
 #' Load a vocabulary file, or retrieve from cache
 #'
-#' {morphemepiece} comes with a vocabulary that can be accessed via
+#' Usually you will want to use the included vocabulary that can be accessed via
 #' `morphemepiece_vocab()`. This function can be used to load (and cache) a
 #' different vocabulary from a file.
 #'
@@ -121,7 +121,7 @@ load_or_retrieve_vocab <- function(vocab_file) {
 
 #' Load a morphemepiece lookup file
 #'
-#' {morphemepiece} comes with a lookup that can be accessed via
+#' Usually you will want to use the included lookup that can be accessed via
 #' `morphemepiece_lookup()`. This function can be used to load a different
 #' lookup from a file.
 #'
@@ -153,7 +153,7 @@ load_lookup <- function(lookup_file) {
 
 #' Load a lookup file, or retrieve from cache
 #'
-#' {morphemepiece} comes with a lookup that can be accessed via
+#' Usually you will want to use the included lookup that can be accessed via
 #' `morphemepiece_lookup()`. This function can be used to load (and cache) a
 #' different lookup from a file.
 #'
