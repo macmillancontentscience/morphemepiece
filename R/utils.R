@@ -12,25 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# .make_cache_filename --------------------------------------------------
-
-#' Construct Cache File Name
-#'
-#' Given the path to a vocabulary file, construct a unique filename using the
-#' hash of the path.
-#'
-#' @inheritParams load_vocab
-#' @return A unique filename to use for cacheing the vocabulary.
-#'
-#' @keywords internal
-.make_cache_filename <- function(vocab_file) {
-  just_name <- basename(vocab_file)
-  dirpath <- normalizePath(dirname(vocab_file))
-  path_hash <- digest::digest(dirpath, algo = "xxhash32")
-  return(paste(just_name, path_hash, "rds", sep = "."))
-}
-
-
 # morphemepiece_cache_dir --------------------------------------------------
 
 #' Retrieve Directory for Morphemepiece Cache
@@ -52,7 +33,7 @@
 #' @return A character vector with the normalized path to the cache.
 #' @export
 morphemepiece_cache_dir <- function() {
-  return(dlr::app_cache_dir("morphemepiece"))
+  return(dlr::app_cache_dir("morphemepiece")) # nocov
 }
 
 #' Set a Cache Directory for Morphemepiece
@@ -67,5 +48,5 @@ morphemepiece_cache_dir <- function() {
 #'   the user has write access and the directory does not exist.
 #' @export
 set_morphemepiece_cache_dir <- function(cache_dir = NULL) {
-  return(dlr::set_app_cache_dir("morphemepiece", cache_dir))
+  return(dlr::set_app_cache_dir("morphemepiece", cache_dir)) # nocov
 }
