@@ -15,6 +15,10 @@
 # load_vocab --------------------------------------------------------------
 
 #' Load a vocabulary file
+#' 
+#' Usually you will want to use the included vocabulary that can be accessed via
+#' `morphemepiece_vocab()`. This function can be used to load a different
+#' vocabulary from a file.
 #'
 #' @param vocab_file path to vocabulary file. File is assumed to be a text file,
 #'   with one token per line, with the line number (starting at zero)
@@ -31,9 +35,6 @@
 #'   starts with index zero.
 #'
 #' @export
-#'
-#' @examples
-#' # todo, after I make tiny sample vocab to include
 load_vocab <- function(vocab_file) {
   token_list <- readLines(vocab_file)
 
@@ -88,6 +89,10 @@ prepare_vocab <- function(token_list) {
 
 #' Load a vocabulary file, or retrieve from cache
 #'
+#' Usually you will want to use the included vocabulary that can be accessed via
+#' `morphemepiece_vocab()`. This function can be used to load (and cache) a
+#' different vocabulary from a file.
+#'
 #' @inheritParams load_vocab
 #'
 #' @return The vocab as a list of named integer vectors. Names are tokens in
@@ -100,9 +105,6 @@ prepare_vocab <- function(token_list) {
 #'   is stored as a named integer vector, and why it starts with index zero.
 #'
 #' @export
-#'
-#' @examples
-#' # todo, after I make tiny sample vocab to include
 load_or_retrieve_vocab <- function(vocab_file) {
   return(
     dlr::read_or_cache(
@@ -119,16 +121,17 @@ load_or_retrieve_vocab <- function(vocab_file) {
 
 #' Load a morphemepiece lookup file
 #'
-#' @param lookup_file path to vocabulary file. File is assumed to be a text
+#' Usually you will want to use the included lookup that can be accessed via
+#' `morphemepiece_lookup()`. This function can be used to load a different
+#' lookup from a file.
+#'
+#' @param lookup_file path to lookup file. File is assumed to be a text
 #'   file, with one word per line. The lookup value, if different from the word,
 #'   follows the word on the same line, after a space.
 #'
 #' @return The lookup as a named list. Names are words in lookup.
 #'
 #' @export
-#'
-#' @examples
-#' # todo, after I make tiny sample vocab to include
 load_lookup <- function(lookup_file) {
   lookup_lines <- readLines(lookup_file)
   # patch for now; fix in wikimorphemes (see "blithely" "fidget" "cyber")
@@ -150,14 +153,15 @@ load_lookup <- function(lookup_file) {
 
 #' Load a lookup file, or retrieve from cache
 #'
+#' Usually you will want to use the included lookup that can be accessed via
+#' `morphemepiece_lookup()`. This function can be used to load (and cache) a
+#' different lookup from a file.
+#'
 #' @inheritParams load_lookup
 #'
 #' @return The lookup table as a named character vector.
 #'
 #' @export
-#'
-#' @examples
-#' # todo, after I make tiny sample vocab to include
 load_or_retrieve_lookup <- function(lookup_file) {
   return(
     dlr::read_or_cache(
@@ -248,14 +252,14 @@ load_or_retrieve_lookup <- function(lookup_file) {
 #' @keywords internal
 .validate_morphemepiece_vocabulary <- function(vocab) {
   if (length(vocab) == 0) {
-    stop("Empty vocabulary.")
+    stop("Empty vocabulary.") # nocov
   }
   tokens <- names(vocab)
   if (anyDuplicated(tokens) > 0) {
-    stop("Duplicate tokens found in vocabulary.")
+    stop("Duplicate tokens found in vocabulary.") # nocov
   }
   if (any(grepl("\\s", tokens))) {
-    stop("Whitespace found in vocabulary tokens.")
+    stop("Whitespace found in vocabulary tokens.") # nocov
   }
   return(vocab)
 }

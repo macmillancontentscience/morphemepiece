@@ -20,6 +20,8 @@ morphemepiece_tokenize(
 "suffixes".}
 
 \item{lookup}{A morphemepiece lookup table.}
+
+\item{max_chars}{Maximum length of word recognized.}
 }
 \value{
 A character vector of tokenized text (later, this should be a named

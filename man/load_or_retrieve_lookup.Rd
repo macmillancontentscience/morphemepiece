@@ -7,7 +7,7 @@
 load_or_retrieve_lookup(lookup_file)
 }
 \arguments{
-\item{lookup_file}{path to vocabulary file. File is assumed to be a text
+\item{lookup_file}{path to lookup file. File is assumed to be a text
 file, with one word per line. The lookup value, if different from the word,
 follows the word on the same line, after a space.}
 }
@@ -15,8 +15,7 @@ follows the word on the same line, after a space.}
 The lookup table as a named character vector.
 }
 \description{
-Load a lookup file, or retrieve from cache
-}
-\examples{
-# todo, after I make tiny sample vocab to include
+Usually you will want to use the included lookup that can be accessed via
+\code{morphemepiece_lookup()}. This function can be used to load (and cache) a
+different lookup from a file.
 }

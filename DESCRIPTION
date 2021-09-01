@@ -1,7 +1,7 @@
 Package: morphemepiece
 Type: Package
 Title: Morpheme Tokenization
-Version: 0.0.5
+Version: 0.0.6
 Authors@R: c(
     person(given = "Jonathan",
            family = "Bratt",
@@ -26,7 +26,6 @@ LazyData: true
 RoxygenNote: 7.1.1
 Roxygen: list(markdown = TRUE)
 Imports:
-    digest,
     dlr (>= 0.0.1),
     magrittr,
     morphemepiece.data,

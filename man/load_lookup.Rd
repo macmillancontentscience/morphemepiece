@@ -7,7 +7,7 @@
 load_lookup(lookup_file)
 }
 \arguments{
-\item{lookup_file}{path to vocabulary file. File is assumed to be a text
+\item{lookup_file}{path to lookup file. File is assumed to be a text
 file, with one word per line. The lookup value, if different from the word,
 follows the word on the same line, after a space.}
 }
@@ -15,8 +15,7 @@ follows the word on the same line, after a space.}
 The lookup as a named list. Names are words in lookup.
 }
 \description{
-Load a morphemepiece lookup file
-}
-\examples{
-# todo, after I make tiny sample vocab to include
+Usually you will want to use the included lookup that can be accessed via
+\code{morphemepiece_lookup()}. This function can be used to load a different
+lookup from a file.
 }

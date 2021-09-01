@@ -23,8 +23,7 @@ is why the vocabulary is stored as a named integer vector, and why it
 starts with index zero.
 }
 \description{
-Load a vocabulary file
-}
-\examples{
-# todo, after I make tiny sample vocab to include
+Usually you will want to use the included vocabulary that can be accessed via
+\code{morphemepiece_vocab()}. This function can be used to load a different
+vocabulary from a file.
 }
