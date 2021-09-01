@@ -248,14 +248,14 @@ load_or_retrieve_lookup <- function(lookup_file) {
 #' @keywords internal
 .validate_morphemepiece_vocabulary <- function(vocab) {
   if (length(vocab) == 0) {
-    stop("Empty vocabulary.")
+    stop("Empty vocabulary.") # nocov
   }
   tokens <- names(vocab)
   if (anyDuplicated(tokens) > 0) {
-    stop("Duplicate tokens found in vocabulary.")
+    stop("Duplicate tokens found in vocabulary.") # nocov
   }
   if (any(grepl("\\s", tokens))) {
-    stop("Whitespace found in vocabulary tokens.")
+    stop("Whitespace found in vocabulary tokens.") # nocov
   }
   return(vocab)
 }

@@ -25,7 +25,7 @@ test_that("lookup words tokenize as expected.", {
   )
   writeLines(vocab_text, temp_vocab_path)
   on.exit(unlink(temp_vocab_path))
-  vocab <- load_vocab(temp_vocab_path)
+  vocab <- load_or_retrieve_vocab(temp_vocab_path)
 
   lookup_text <- c(
     "foxes fox ##s",
@@ -37,7 +37,7 @@ test_that("lookup words tokenize as expected.", {
   )
   writeLines(lookup_text, temp_lookup_path)
   on.exit(unlink(temp_lookup_path), add = TRUE)
-  lookup <- load_lookup(temp_lookup_path)
+  lookup <- load_or_retrieve_lookup(temp_lookup_path)
 
   test_result <- morphemepiece_tokenize(
     text = c("unaffable unable foxes running.", "affable able fox runs"),
@@ -51,5 +51,21 @@ test_that("lookup words tokenize as expected.", {
     ),
     c(affable = 4L, able = 5L, fox = 7L, run = 8L, `##s` = 54L)
   )
-  expect_identical(test_result, expected_result)
+  testthat::expect_identical(test_result, expected_result)
+  
+  # Can also test using the imported morphemepiece.data vocab + lookup
+  test_result <- morphemepiece_tokenize("chairball")
+  expected_result <- list(c(chair = 4469L,`##` = 3024L, ball = 4684L))
+  testthat::expect_identical(test_result, expected_result)
+  
+  # test max_chars
+  test_result <- morphemepiece_tokenize("longword", max_chars = 7L)
+  expected_result <- list(c(`[UNK]` = 1L))
+  testthat::expect_identical(test_result, expected_result)
+  
+  # Find a word that tests the backwards run of the fall-through...
+  test_result <- morphemepiece_tokenize("unarcher")
+  expected_result <- list(c(`un##` = 11870L, archer = 4443L))
+  testthat::expect_identical(test_result, expected_result)
+  
 })
