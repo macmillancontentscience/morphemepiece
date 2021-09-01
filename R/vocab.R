@@ -130,7 +130,7 @@ load_or_retrieve_vocab <- function(vocab_file) {
 
 #' Load a morphemepiece lookup file
 #'
-#' @param lookup_file path to vocabulary file. File is assumed to be a text
+#' @param lookup_file path to lookup file. File is assumed to be a text
 #'   file, with one word per line. The lookup value, if different from the word,
 #'   follows the word on the same line, after a space.
 #'

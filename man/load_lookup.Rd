@@ -7,7 +7,7 @@
 load_lookup(lookup_file)
 }
 \arguments{
-\item{lookup_file}{path to vocabulary file. File is assumed to be a text
+\item{lookup_file}{path to lookup file. File is assumed to be a text
 file, with one word per line. The lookup value, if different from the word,
 follows the word on the same line, after a space.}
 }
