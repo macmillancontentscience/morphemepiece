@@ -123,5 +123,5 @@ scored %>%
 ```
 
 By almost all measures, the new algorithm gives breakdowns closer to "correct"
-than the old one. However, the new alogrithm scores 0 more often than the old,
+than the old one. However, the new algorithm scores 0 more often than the old,
 so the comparison isn't completely one-sided.
