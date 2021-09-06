@@ -22,7 +22,6 @@ Description: Tokenize text into morphemes. The morphemepiece algorithm uses a
   table.
 URL: https://github.com/macmillancontentscience/morphemepiece
 BugReports: https://github.com/macmillancontentscience/morphemepiece/issues
-Depends: R (>= 3.5.2)
 License: Apache License (>= 2)
 Encoding: UTF-8
 RoxygenNote: 7.1.1
