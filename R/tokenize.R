@@ -167,6 +167,7 @@
 #' @param vocab Named integer vector containing vocabulary words. Should have
 #'   "vocab_split" attribute, with components named "prefixes", "words",
 #'   "suffixes".
+#' @param unk_token Token to represent unknown words.
 #' @param max_chars Maximum length of word recognized.
 #' @param allow_compounds Logical; whether to allow multiple whole words in the
 #'   breakdown. Default is TRUE. This option will not be exposed to end users;

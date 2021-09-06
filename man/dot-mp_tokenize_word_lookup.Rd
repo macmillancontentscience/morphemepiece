@@ -15,6 +15,8 @@
 
 \item{lookup}{A morphemepiece lookup table.}
 
+\item{unk_token}{Token to represent unknown words.}
+
 \item{max_chars}{Maximum length of word recognized.}
 }
 \value{

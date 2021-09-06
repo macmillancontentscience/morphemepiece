@@ -19,6 +19,8 @@
 "vocab_split" attribute, with components named "prefixes", "words",
 "suffixes".}
 
+\item{unk_token}{Token to represent unknown words.}
+
 \item{max_chars}{Maximum length of word recognized.}
 
 \item{allow_compounds}{Logical; whether to allow multiple whole words in the
