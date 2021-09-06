@@ -1,7 +1,7 @@
 Package: morphemepiece
 Type: Package
 Title: Morpheme Tokenization
-Version: 0.0.6
+Version: 1.0.0
 Authors@R: c(
     person(given = "Jonathan",
            family = "Bratt",
@@ -16,36 +16,31 @@ Authors@R: c(
     person(given = "Bedford Freeman & Worth Pub Grp LLC DBA Macmillan Learning", 
            role = c("cph"))
     )
-Description: Tokenize words into morphemes (the smallest unit of meaning).
+Description: Tokenize text into morphemes.
 URL: https://github.com/macmillancontentscience/morphemepiece
 BugReports: https://github.com/macmillancontentscience/morphemepiece/issues
 Depends: R (>= 3.5.2)
 License: Apache License (>= 2)
 Encoding: UTF-8
-LazyData: true
 RoxygenNote: 7.1.1
 Roxygen: list(markdown = TRUE)
 Imports:
-    dlr (>= 0.0.1),
+    dlr (>= 1.0.0),
     magrittr,
     morphemepiece.data,
     piecemaker (>= 1.0.0),
     purrr (>= 0.3.4),
     rlang,
     stringr (>= 1.4.0)
-Remotes:
-    macmillancontentscience/dlr,
-    macmillancontentscience/morphemepiece.data
 Suggests:
     dplyr,
     fs,
     ggplot2,
     here,
     knitr,
+    remotes,
     rmarkdown,
     testthat (>= 3.0.0),
-    utils,
-    wikimorphemes,
-    wordpiece.data
+    utils
 VignetteBuilder: knitr
 Config/testthat/edition: 3
