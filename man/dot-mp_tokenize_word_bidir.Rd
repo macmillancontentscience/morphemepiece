@@ -4,7 +4,13 @@
 \alias{.mp_tokenize_word_bidir}
 \title{Tokenize a Word Bidirectionally}
 \usage{
-.mp_tokenize_word_bidir(word, vocab, max_chars, allow_compounds = TRUE)
+.mp_tokenize_word_bidir(
+  word,
+  vocab,
+  unk_token,
+  max_chars,
+  allow_compounds = TRUE
+)
 }
 \arguments{
 \item{word}{Character scalar; word to tokenize.}
