@@ -4,7 +4,7 @@
 \alias{.mp_tokenize_word_lookup}
 \title{Tokenize a Word Including Lookup}
 \usage{
-.mp_tokenize_word_lookup(word, vocab, lookup, max_chars)
+.mp_tokenize_word_lookup(word, vocab, lookup, unk_token, max_chars)
 }
 \arguments{
 \item{word}{Character scalar; word to tokenize.}
@@ -14,6 +14,8 @@
 "suffixes".}
 
 \item{lookup}{A morphemepiece lookup table.}
+
+\item{unk_token}{Token to represent unknown words.}
 
 \item{max_chars}{Maximum length of word recognized.}
 }

@@ -16,6 +16,9 @@ knitr::opts_chunk$set(
 ```
 
 ```{r setup}
+# Install non-CRAN packages
+# remotes::install_github("macmillancontentscience/wikimorphemes")
+# remotes::install_github("macmillancontentscience/wordpiece.data")
 library(morphemepiece)
 library(wikimorphemes)
 library(wordpiece.data)
