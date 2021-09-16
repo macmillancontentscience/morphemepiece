@@ -106,13 +106,13 @@ prepare_vocab <- function(token_list) {
 #'
 #' @export
 load_or_retrieve_vocab <- function(vocab_file) {
-  return(
+  return( # nocov start
     dlr::read_or_cache(
       source_path = vocab_file,
       appname = "morphemepiece",
       process_f = load_vocab
     )
-  )
+  ) # nocov end
 }
 
 
@@ -163,13 +163,13 @@ load_lookup <- function(lookup_file) {
 #'
 #' @export
 load_or_retrieve_lookup <- function(lookup_file) {
-  return(
+  return( # nocov start
     dlr::read_or_cache(
       source_path = lookup_file,
       appname = "morphemepiece",
       process_f = load_lookup
     )
-  )
+  ) # nocov end
 }
 
 

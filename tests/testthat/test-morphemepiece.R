@@ -39,7 +39,7 @@ test_that("lookup words tokenize as expected.", {
   )
   writeLines(vocab_text, temp_vocab_path)
   on.exit(unlink(temp_vocab_path))
-  vocab <- load_or_retrieve_vocab(temp_vocab_path)
+  vocab <- load_vocab(temp_vocab_path)
 
   lookup_text <- c(
     "foxes fox ##s",
@@ -51,7 +51,7 @@ test_that("lookup words tokenize as expected.", {
   )
   writeLines(lookup_text, temp_lookup_path)
   on.exit(unlink(temp_lookup_path), add = TRUE)
-  lookup <- load_or_retrieve_lookup(temp_lookup_path)
+  lookup <- load_lookup(temp_lookup_path)
 
   test_result <- morphemepiece_tokenize(
     text = c("unaffable unable foxes running.", "affable able fox runs"),

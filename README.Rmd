@@ -19,11 +19,10 @@ The goal of morphemepiece is to allow you to tokenize words into morphemes (the 
 
 ## Installation
 
-You can install the released version of wordpiece from [CRAN](https://CRAN.R-project.org) with:
+You can install the released version of morphemepiece from [CRAN](https://CRAN.R-project.org) with:
 
 ``` r
-# No you can't.
-# install.packages("morphemepiece")
+install.packages("morphemepiece")
 ```
 
 And the development version from [GitHub](https://github.com/) with:
