@@ -15,7 +15,7 @@
 # load_vocab --------------------------------------------------------------
 
 #' Load a vocabulary file
-#' 
+#'
 #' Usually you will want to use the included vocabulary that can be accessed via
 #' `morphemepiece_vocab()`. This function can be used to load a different
 #' vocabulary from a file.
@@ -36,7 +36,10 @@
 #'
 #' @export
 load_vocab <- function(vocab_file) {
-  token_list <- readLines(vocab_file)
+  token_list <- readr::read_lines(
+    vocab_file,
+    lazy = FALSE
+  )
 
   return(prepare_vocab(token_list))
 }
@@ -133,7 +136,7 @@ load_or_retrieve_vocab <- function(vocab_file) {
 #'
 #' @export
 load_lookup <- function(lookup_file) {
-  lookup_lines <- readLines(lookup_file)
+  lookup_lines <- readr::read_lines(lookup_file, lazy = FALSE)
   # patch for now; fix in wikimorphemes (see "blithely" "fidget" "cyber")
   lookup_lines <- piecemaker::validate_utf8(
     stringr::str_remove_all(lookup_lines, "[^a-z]*$")
