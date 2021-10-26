@@ -81,6 +81,7 @@ make_vocab_and_lookup <- function(full_lookup,
     wp_proper_nouns,
     supplemental_tokens
   ) %>%
+    piecemaker::validate_utf8() %>%
     unique()
 
   if (length(vocab) < target_vocab_size) {
@@ -122,11 +123,52 @@ make_vocab_and_lookup <- function(full_lookup,
 }
 
 .unnest_lookup <- function(lookup, clean = TRUE) {
-  if (clean) { # keep only words in all lowercase latin alphabet
-    lookup <- dplyr::filter(
-      lookup,
-      !stringr::str_detect(.data$word, "[^a-z]")
-    )
+  if (clean) { # Clean out characters that aren't lowercase latin.
+    lookup <- lookup %>%
+      # Replace -- with -. Somehow some made it through. Also get rid of
+      # diacritics.
+      dplyr::mutate(
+        word = stringr::str_replace_all(.data$word, stringr::fixed("--"), "-"),
+        word = piecemaker::remove_diacritics(.data$word)
+      ) %>%
+      dplyr::filter(
+        # Get rid of any remaining words that contain anything other than letters
+        # stringr::str_starts(.data$word, "[A-Za-z]")
+        !stringr::str_detect(.data$word, "[^a-z]"),
+        !(.data$word == "")
+      ) %>%
+      dplyr::distinct()
+
+    # Do a similar process in the morphemes. This can be rough because we don't
+    # want to lose the names.
+    lookup <- lookup %>%
+      dplyr::mutate(
+        morphemes = purrr::map(
+          .data$morphemes,
+          function(these_morphemes) {
+            to_return <- piecemaker::remove_diacritics(tolower(these_morphemes))
+            names(to_return) <- names(these_morphemes)
+            return(to_return)
+          }
+        ),
+        has_special = purrr::map_lgl(
+          .data$morphemes,
+          function(these_morphemes) {
+            any(stringr::str_detect(these_morphemes, "[^a-z-]"))
+          }
+        )
+      ) %>%
+      dplyr::filter(!.data$has_special) %>%
+      dplyr::select(-.data$has_special) %>%
+      dplyr::distinct()
+
+    # Keep the version of the word with the most morphemes. In case of a tie,
+    # just keep the first one.
+    lookup <- lookup %>%
+      dplyr::group_by(.data$word) %>%
+      dplyr::filter(.data$n_morphemes == max(.data$n_morphemes)) %>%
+      dplyr::ungroup() %>%
+      dplyr::distinct(.data$word, .keep_all = TRUE)
   }
   if (!nrow(lookup)) {
     return(
@@ -159,15 +201,6 @@ make_vocab_and_lookup <- function(full_lookup,
       token = paste0(.data$before, .data$morphemes, .data$after)
     ) %>%
     dplyr::select(.data$word, .data$token, .data$morpheme_type)
-
-  if (clean) {
-    # Don't remove tokens here! Otherwise we'll get incomplete words.
-    # BUT... let's cast all tokens to lowercase at this point.
-    unnested_lookup <- dplyr::mutate(
-      unnested_lookup,
-      token = tolower(.data$token)
-    )
-  }
 
   return(unnested_lookup)
 }

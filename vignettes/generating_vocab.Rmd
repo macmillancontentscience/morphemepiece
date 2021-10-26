@@ -244,12 +244,12 @@ text_lookup_large <- .make_text_lookup(
   word_freq_tab = word_frequency_table
 )
 
-writeLines(
+readr::write_lines(
   text_lookup_large, 
   file.path(morphemepiece_cache_dir(), "mp_lookup_large.txt")
 )
 # vocab is already just a character vector
-writeLines(
+readr::write_lines(
   vandl_large$vocab, 
   file.path(morphemepiece_cache_dir(), "mp_vocab_large.txt")
 )
@@ -263,6 +263,7 @@ lookup <- load_or_retrieve_lookup(
 )
 
 morphemepiece_tokenize("Surprisingly easy", vocab, lookup)
+morphemepiece_tokenize("'Twas brillig, and the slithy toves", vocab, lookup)
 ```
 
 ## Check coverage
@@ -287,7 +288,7 @@ corpus_coverage_small %>%
   dplyr::summarize(sum(covered_weighted)/sum(word_count))
 ```
 
-The "small" vocabulary covers 95% of words from the corpus, weighted by usage. 
+The "small" vocabulary covers 95.1% of words from the corpus, weighted by usage. 
 
 ```{r check-coverage-large}
 corpus_coverage_large <- dplyr::left_join(
@@ -305,25 +306,36 @@ corpus_coverage_large %>%
   dplyr::summarize(sum(covered_weighted)/sum(word_count))
 ```
 
-The "large" vocabulary covers 96.5% of words, 1.5% more words (weighted) than the "small" vocabulary. 
+The "large" vocabulary covers 96.6% of words, 1.5% more words (weighted) than the "small" vocabulary. 
 
 It is useful to look at the most common words that are *not* covered by the vocabularies:
 
 ```{r show-coverage-large}
 #large
-corpus_coverage_large %>% 
-  dplyr::filter(!covered) %>% 
-  dplyr::arrange(dplyr::desc(word_count)) %>% 
-  utils::head(10) %>% 
-  dplyr::select(word, word_count)
+uncovered <- corpus_coverage_large %>% 
+  dplyr::filter(!.data$covered) %>% 
+  dplyr::arrange(dplyr::desc(.data$word_count)) %>% 
+  dplyr::select(.data$word, .data$word_count) %>% 
+  head(100) %>% 
+  dplyr::mutate(
+    tokenization = morphemepiece_tokenize(
+      .data$word, 
+      vocab = vocab, 
+      lookup = lookup
+    )
+  ) %>% 
+  dplyr::rowwise() %>% 
+  dplyr::mutate(
+    tokenization = paste(names(.data$tokenization), collapse = " ")
+  ) %>% 
+  dplyr::ungroup()
+
+head(uncovered, 10)
 ```
 
-Our process (as of August 2021) has a hole: abbreviations such as "km" and "cm" really should be in the vocabulary, but they are missing due to not having an "English" section in Wiktionary.
-We'll address this in a future update.
+Categories of uncovered words include some proper nouns and partial contractions (like "didn").
 
-Other categories of uncovered words include some proper nouns, words with diacritical marks, and partial contractions (like "didn").
-
-The word "los" in this list raises an interesting question for future consideration: should a small set of common words in languages besides English be included? After all, a significant number of tokens in both wordpiece and morphemepiece are currently used for Asian language characters.
+The word "los" in this list raises an interesting question for future consideration: should a small set of very common words in languages besides English be included? After all, a significant number of tokens in both wordpiece and morphemepiece are currently used for Asian language characters.
 
 ## Other measures of coverage quality
 
@@ -337,21 +349,22 @@ Some other checks we will try include:
 ```{r xkcd, eval = FALSE}
 # just for fun :-D
 xkcd_words_url <- "https://xkcd.com/simplewriter/words.js"
-tf <- tempfile()
-system(paste("wget", xkcd_words_url, "-O", tf))
-system(paste("echo >>", tf)) # add final newline
+raw_words <- readr::read_lines(xkcd_words_url)
 
-raw_words <- readLines(tf)
 raw_words <- raw_words[grepl("WORDS", raw_words)]
 raw_words <- stringr::str_split(raw_words, '"')[[1]]
 raw_words <- raw_words[grepl("\\|", raw_words)]
 words <- dplyr::tibble(top_words = stringr::str_split(raw_words, "\\|")[[1]])
 # I feel lied to. There are more than 3k words in this list.
 words <- words %>% 
-  dplyr::mutate(tokenized = purrr::map_chr(top_words, function(w) {
-    paste(names(morphemepiece_tokenize(w, vocab, lookup)), collapse = " ")[[1]]
-  }) 
-  )
+  dplyr::mutate(
+    tokenized = morphemepiece_tokenize(.data$top_words, vocab, lookup)
+  ) %>% 
+  dplyr::rowwise() %>% 
+  dplyr::mutate(
+    tokenized = paste(names(.data$tokenized), collapse = " ")
+  ) %>% 
+  dplyr::ungroup()
 
 # ss_url <- "url of mp_scratch google sheet"
 
@@ -359,14 +372,15 @@ words <- words %>%
 # googlesheets4::write_sheet(words, ss_url)
 # manual check, add column "is_ok"
 
-checked_words <- googlesheets4::read_sheet(ss_url, sheet = "check common words")
+# checked_words <- googlesheets4::read_sheet(ss_url, sheet = "check common words")
 
 # if breakdown is ok, value is "y"
 
-mean(checked_words$is_ok == "y")
+# mean(checked_words$is_ok == "y")
 
 # [1] 0.9711062
 # many of the exceptions can/should be fixed in wiktionary
+# These have not been checked in a while.
 ```
 
 Fewer than 3% of these words (about 100 total) were judged to be problematic.
@@ -387,13 +401,13 @@ unbroken_sample <- dplyr::tibble(unbroken_word = sample(unbroken_vocab_words,
 
 # googlesheets4::write_sheet(unbroken_sample, ss_url, sheet = "unbroken_check")
 # manual check, add column "is_ok"
-checked_unbroken_words <- googlesheets4::read_sheet(
-  ss_url, 
-  sheet = "check unbroken words"
-)
+# checked_unbroken_words <- googlesheets4::read_sheet(
+#   ss_url, 
+#   sheet = "check unbroken words"
+# )
 
 # if breakdown is ok, value is "y"
-table(checked_unbroken_words$is_ok)
+# table(checked_unbroken_words$is_ok)
  #  ?   n   y 
  # 24  32 244 
 # many of the exceptions can/should be fixed in wiktionary
