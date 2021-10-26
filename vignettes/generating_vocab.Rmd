@@ -253,9 +253,6 @@ readr::write_lines(
   vandl_large$vocab, 
   file.path(morphemepiece_cache_dir(), "mp_vocab_large.txt")
 )
-vocab_raw <- readr::read_lines(
-  file.path(morphemepiece_cache_dir(), "mp_vocab_large.txt")
-)
 
 # Read back from text files to process as standard {morphemepiece} files:
 vocab <- load_or_retrieve_vocab(
