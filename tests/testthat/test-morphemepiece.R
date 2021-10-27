@@ -69,7 +69,14 @@ test_that("lookup words tokenize as expected.", {
 
   # Can also test using the imported morphemepiece.data vocab + lookup
   test_result <- morphemepiece_tokenize("chairball")
-  expected_result <- list(c(chair = 4514L,`##` = 3024L, ball = 4731L))
+  # Manually construct the expected result from the vocab.
+  expected_result <- list(
+    c(
+      morphemepiece_vocab()["chair"],
+      morphemepiece_vocab()["##"],
+      morphemepiece_vocab()["ball"]
+    )
+  )
   testthat::expect_identical(test_result, expected_result)
 
   # test max_chars
@@ -79,7 +86,12 @@ test_that("lookup words tokenize as expected.", {
 
   # Find a word that tests the backwards run of the fall-through...
   test_result <- morphemepiece_tokenize("unarcher")
-  expected_result <- list(c(`un##` = 11995L, archer = 4487L))
+  # Manually construct the expected result from the vocab.
+  expected_result <- list(
+    c(
+      morphemepiece_vocab()["un##"],
+      morphemepiece_vocab()["archer"]
+    )
+  )
   testthat::expect_identical(test_result, expected_result)
-
 })
