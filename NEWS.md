@@ -1,3 +1,8 @@
+# morphemepiece 1.1.0
+
+* Improved read/write to better handle encoding.
+* Made tests less sensitive to morphemepiece.data changes.
+
 # morphemepiece 1.0.1
 
 * Cleaned up tests for CRAN.
