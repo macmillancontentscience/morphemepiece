@@ -66,20 +66,20 @@ test_that("lookup words tokenize as expected.", {
     c(affable = 4L, able = 5L, fox = 7L, run = 8L, `##s` = 54L)
   )
   testthat::expect_identical(test_result, expected_result)
-  
+
   # Can also test using the imported morphemepiece.data vocab + lookup
   test_result <- morphemepiece_tokenize("chairball")
-  expected_result <- list(c(chair = 4469L,`##` = 3024L, ball = 4684L))
+  expected_result <- list(c(chair = 4514L,`##` = 3024L, ball = 4731L))
   testthat::expect_identical(test_result, expected_result)
-  
+
   # test max_chars
-  test_result <- morphemepiece_tokenize("longword", max_chars = 7L)
+  test_result <- morphemepiece_tokenize("longfakewordxzz", max_chars = 7L)
   expected_result <- list(c(`[UNK]` = 1L))
   testthat::expect_identical(test_result, expected_result)
-  
+
   # Find a word that tests the backwards run of the fall-through...
   test_result <- morphemepiece_tokenize("unarcher")
-  expected_result <- list(c(`un##` = 11870L, archer = 4443L))
+  expected_result <- list(c(`un##` = 11995L, archer = 4487L))
   testthat::expect_identical(test_result, expected_result)
-  
+
 })
