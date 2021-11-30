@@ -175,10 +175,10 @@
 #'
 #' @return Input word as a list of tokens.
 #' @keywords internal
-.mp_tokenize_word_bidir <- function(word, 
-                                    vocab, 
+.mp_tokenize_word_bidir <- function(word,
+                                    vocab,
                                     unk_token,
-                                    max_chars, 
+                                    max_chars,
                                     allow_compounds = TRUE) {
   vocab_split <- attr(vocab, "vocab_split")
   t1 <- .mp_tokenize_word(word, vocab_split,
@@ -244,11 +244,14 @@
 #'
 #' @return Input word, broken into tokens.
 #' @keywords internal
-.mp_tokenize_word_lookup <- function(word, 
-                                     vocab, 
-                                     lookup, 
-                                     unk_token, 
+.mp_tokenize_word_lookup <- function(word,
+                                     vocab,
+                                     lookup,
+                                     unk_token,
                                      max_chars) {
+  if (word == "") {
+    return(integer(0))
+  }
   if (word %in% names(vocab)) { # punctuation, etc.
     return(vocab[word])
   }
@@ -289,19 +292,21 @@ morphemepiece_tokenize <- function(text,
     text <- tolower(text)
   }
 
-  text <- piecemaker::prepare_and_tokenize(
+  word_lists <- piecemaker::prepare_and_tokenize(
     text = text,
     prepare = TRUE,
     remove_terminal_hyphens = FALSE
   )
 
-  text <- purrr::map(
-    text,
+  tokens <- purrr::map(
+    word_lists,
     .f = .mp_tokenize_single_string,
     vocab = vocab,
     lookup = lookup,
     unk_token = unk_token,
     max_chars = max_chars
   )
-  return(text)
+  # Length-0 token vectors need to still be named.
+  tokens[lengths(tokens) == 0] <- list(vocab[character(0)])
+  return(tokens)
 }

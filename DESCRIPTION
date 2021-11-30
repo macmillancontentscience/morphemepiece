@@ -1,7 +1,7 @@
 Package: morphemepiece
 Type: Package
 Title: Morpheme Tokenization
-Version: 1.1.0
+Version: 1.1.1
 Authors@R: c(
     person(given = "Jonathan",
            family = "Bratt",
