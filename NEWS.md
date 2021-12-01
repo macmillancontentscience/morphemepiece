@@ -1,3 +1,7 @@
+# morphemepiece 1.1.1
+
+* Blank strings ("") now return integer(0) instead of the unknown token.
+
 # morphemepiece 1.1.0
 
 * Improved read/write to better handle encoding.

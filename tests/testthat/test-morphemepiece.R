@@ -95,3 +95,19 @@ test_that("lookup words tokenize as expected.", {
   )
   testthat::expect_identical(test_result, expected_result)
 })
+
+test_that("Corner cases are handled properly.", {
+  vocab <- morphemepiece_vocab()
+
+  test_result <- morphemepiece_tokenize(text = "")
+  expected_result <- list(structure(integer(0), .Names = character(0)))
+  expect_identical(test_result, expected_result)
+
+  test_result <- morphemepiece_tokenize(text = c("two word", "", "that"))
+  expected_result <- list(
+    vocab[c("two", "word")],
+    structure(integer(0), .Names = character(0)),
+    vocab["that"]
+  )
+  expect_identical(test_result, expected_result)
+})
