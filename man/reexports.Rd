@@ -6,6 +6,7 @@
 \alias{\%>\%}
 \alias{.data}
 \alias{\%||\%}
+\alias{\%fin\%}
 \alias{morphemepiece_vocab}
 \alias{morphemepiece_lookup}
 \title{Objects exported from other packages}
@@ -15,10 +16,12 @@ These objects are imported from other packages. Follow the links
 below to see their documentation.
 
 \describe{
+  \item{fastmatch}{\code{\link[fastmatch:fmatch]{\%fin\%}}}
+
   \item{magrittr}{\code{\link[magrittr:pipe]{\%>\%}}}
 
   \item{morphemepiece.data}{\code{\link[morphemepiece.data]{morphemepiece_lookup}}, \code{\link[morphemepiece.data]{morphemepiece_vocab}}}
 
-  \item{rlang}{\code{\link[rlang:op-null-default]{\%||\%}}, \code{\link[rlang:tidyeval-data]{.data}}}
+  \item{rlang}{\code{\link[rlang:op-null-default]{\%||\%}}, \code{\link[rlang:dot-data]{.data}}}
 }}
 

@@ -100,22 +100,22 @@
       sub_str <- substr(word, start, end) # inclusive on both ends
 
       # first look for prefixes, if allowed
-      if ("p" %in% allowed_next & end < wordlen & sub_str %in% prefixes) {
+      if ("p" %fin% allowed_next & end < wordlen & sub_str %fin% prefixes) {
         cur_substr <- paste0(sub_str, frag_pat)
         allowed_next <- allowed_next_rules[["p"]]
         break
       }
       # next, look for suffix-like pieces, if we're not at start of word
-      if ("s" %in% allowed_next & start > 1 & sub_str %in% suffixes) {
+      if ("s" %fin% allowed_next & start > 1 & sub_str %fin% suffixes) {
         cur_substr <- paste0(frag_pat, sub_str)
         allowed_next <- allowed_next_rules[["s"]]
         break
       }
       # finally, look for complete words, if allowed
-      if (any(c("w", "#") %in% allowed_next) & sub_str %in% words) {
+      if (any(c("w", "#") %fin% allowed_next) & sub_str %fin% words) {
         cur_substr <- sub_str
         # insert the frag_pat token in, if we're between complete words
-        if ("#" %in% allowed_next) {
+        if ("#" %fin% allowed_next) {
           if (dir == 1) {
             cur_substr <- append(frag_pat, cur_substr)
           } else {
@@ -252,13 +252,13 @@
   if (word == "") {
     return(integer(0))
   }
-  if (word %in% names(vocab)) { # punctuation, etc.
+  if (word %fin% names(vocab)) { # punctuation, etc.
     return(vocab[word])
   }
   # may as well remove unbroken words from lookup, even though it's relatively
   # small component?
   # mean(purrr::map_int(lookup, grepl, pattern="##"))
-  if (word %in% names(lookup)) {
+  if (word %fin% names(lookup)) {
     breakdown <- lookup[[word]]
     token_list <- stringr::str_split(breakdown, pattern = " ")[[1]]
   } else {

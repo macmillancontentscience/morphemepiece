@@ -23,6 +23,9 @@ rlang::.data
 #' @importFrom rlang %||%
 rlang::`%||%`
 
+#' @importFrom fastmatch %fin%
+fastmatch::`%fin%`
+
 #' @importFrom morphemepiece.data morphemepiece_vocab
 #' @export
 morphemepiece.data::morphemepiece_vocab
