@@ -164,7 +164,7 @@
 #' pieces.
 #'
 #' @param word Character scalar; word to tokenize.
-#' @param vocab_split List of character vector containing vocabulary words.
+#' @param vocab_split List of character vectors containing vocabulary words.
 #'   Should have components named "prefixes", "words", "suffixes".
 #' @param unk_token Token to represent unknown words.
 #' @param max_chars Maximum length of word recognized.
