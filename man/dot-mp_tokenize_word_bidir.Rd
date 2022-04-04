@@ -6,7 +6,7 @@
 \usage{
 .mp_tokenize_word_bidir(
   word,
-  vocab,
+  vocab_split,
   unk_token,
   max_chars,
   allow_compounds = TRUE
@@ -15,9 +15,8 @@
 \arguments{
 \item{word}{Character scalar; word to tokenize.}
 
-\item{vocab}{Named integer vector containing vocabulary words. Should have
-"vocab_split" attribute, with components named "prefixes", "words",
-"suffixes".}
+\item{vocab_split}{List of character vectors containing vocabulary words.
+Should have components named "prefixes", "words", "suffixes".}
 
 \item{unk_token}{Token to represent unknown words.}
 

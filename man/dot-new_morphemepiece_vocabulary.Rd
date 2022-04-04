@@ -7,16 +7,16 @@
 .new_morphemepiece_vocabulary(vocab, vocab_split, is_cased)
 }
 \arguments{
-\item{vocab}{Named integer vector; the "actual" vocabulary.}
+\item{vocab}{Character vector; the "actual" vocabulary.}
 
-\item{vocab_split}{List of named integer vectors; the split vocabulary.}
+\item{vocab_split}{List of character vectors; the split vocabulary.}
 
 \item{is_cased}{Logical; whether the vocabulary is cased.}
 }
 \value{
 The vocabulary with \code{is_cased} attached as an attribute, and the
-class \code{morphemepiece_vocabulary} applied. The split and reversed
-vocabularies are also attached as attributes.
+class \code{morphemepiece_vocabulary} applied. The split vocabulary is also
+attached as an attribute.
 }
 \description{
 Constructor for Class morphemepiece_vocabulary

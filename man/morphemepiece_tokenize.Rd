@@ -15,9 +15,7 @@ morphemepiece_tokenize(
 \arguments{
 \item{text}{Character scalar; text to tokenize.}
 
-\item{vocab}{Named integer vector containing vocabulary words. Should have
-"vocab_split" attribute, with components named "prefixes", "words",
-"suffixes".}
+\item{vocab}{A morphemepiece vocabulary.}
 
 \item{lookup}{A morphemepiece lookup table.}
 

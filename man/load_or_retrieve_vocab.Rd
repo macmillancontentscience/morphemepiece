@@ -12,14 +12,14 @@ with one token per line, with the line number (starting at zero)
 corresponding to the index of that token in the vocabulary.}
 }
 \value{
-The vocab as a list of named integer vectors. Names are tokens in
-vocabulary, values are integer indices. The casedness of the vocabulary is
-inferred and attached as the "is_cased" attribute.
+The vocab as a character vector of tokens. The casedness of the
+vocabulary is inferred and attached as the "is_cased" attribute. The
+vocabulary indices are taken to be the positions of the tokens,
+\emph{starting at zero} for historical consistency.
 
 Note that from the perspective of a neural net, the numeric indices \emph{are}
 the tokens, and the mapping from token to index is fixed. If we changed the
-indexing, it would break any pre-trained models. This is why the vocabulary
-is stored as a named integer vector, and why it starts with index zero.
+indexing, it would break any pre-trained models using that vocabulary.
 }
 \description{
 Usually you will want to use the included vocabulary that can be accessed via
