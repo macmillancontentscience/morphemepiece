@@ -24,15 +24,14 @@
 #'   with one token per line, with the line number (starting at zero)
 #'   corresponding to the index of that token in the vocabulary.
 #'
-#' @return The vocab as a named integer vector. Names are tokens in vocabulary,
-#'   values are integer indices. The casedness of the vocabulary is inferred
-#'   and attached as the "is_cased" attribute.
+#' @return The vocab as a character vector of tokens. The casedness of the
+#'   vocabulary is inferred and attached as the "is_cased" attribute. The
+#'   vocabulary indices are taken to be the positions of the tokens, 
+#'   *starting at zero* for historical consistency.
 #'
 #'   Note that from the perspective of a neural net, the numeric indices *are*
 #'   the tokens, and the mapping from token to index is fixed. If we changed the
-#'   indexing, it would break any pre-trained models using that vocabulary. This
-#'   is why the vocabulary is stored as a named integer vector, and why it
-#'   starts with index zero.
+#'   indexing, it would break any pre-trained models using that vocabulary. 
 #'
 #' @export
 load_vocab <- function(vocab_file) {
@@ -44,24 +43,25 @@ load_vocab <- function(vocab_file) {
   return(prepare_vocab(token_list))
 }
 
+# prepare_vocab --------------------------------------------------------------
+
 #' Format a Token List as a Vocabulary
 #'
-#' We use a special named integer vector with class morphemepiece_vocabulary to
-#' provide information about tokens used in
+#' We use a character vector with class morphemepiece_vocabulary to provide
+#' information about tokens used in
 #' \code{\link{morphemepiece_tokenize}}. This function takes a character vector
 #' of tokens and puts it into that format.
 #'
 #' @param token_list A character vector of tokens.
 #'
-#' @return The vocab as a named integer vector. Names are tokens in vocabulary,
-#'   values are integer indices. The casedness of the vocabulary is inferred
-#'   and attached as the "is_cased" attribute.
+#' @return The vocab as a character vector of tokens. The casedness of the
+#'   vocabulary is inferred and attached as the "is_cased" attribute. The
+#'   vocabulary indices are taken to be the positions of the tokens, 
+#'   *starting at zero* for historical consistency.
 #'
 #'   Note that from the perspective of a neural net, the numeric indices *are*
 #'   the tokens, and the mapping from token to index is fixed. If we changed the
-#'   indexing, it would break any pre-trained models using that vocabulary. This
-#'   is why the vocabulary is stored as a named integer vector, and why it
-#'   starts with index zero.
+#'   indexing, it would break any pre-trained models using that vocabulary. 
 #' @export
 #'
 #' @examples
@@ -71,15 +71,11 @@ load_vocab <- function(vocab_file) {
 prepare_vocab <- function(token_list) {
   token_list <- piecemaker::validate_utf8(trimws(token_list))
 
-  # The vocab is zero-indexed.
-  named_vocab <- seq_along(token_list) - 1L
-  names(named_vocab) <- token_list
-
   # attach processed form of vocab as attribute to speed up computations.
   vocab_split <- .split_vocab(token_list)
   is_cased <- .infer_case_from_vocab(token_list) # sure, why not.
   vocab_all <- .new_morphemepiece_vocabulary(
-    named_vocab,
+    token_list,
     vocab_split,
     is_cased
   )
@@ -87,7 +83,7 @@ prepare_vocab <- function(token_list) {
 }
 
 
-# load_or_retrieve_vocab  ------------------------------------------------------
+# load_or_retrieve_vocab ------------------------------------------------------
 
 
 #' Load a vocabulary file, or retrieve from cache
@@ -98,14 +94,14 @@ prepare_vocab <- function(token_list) {
 #'
 #' @inheritParams load_vocab
 #'
-#' @return The vocab as a list of named integer vectors. Names are tokens in
-#'   vocabulary, values are integer indices. The casedness of the vocabulary is
-#'   inferred and attached as the "is_cased" attribute.
+#' @return The vocab as a character vector of tokens. The casedness of the
+#'   vocabulary is inferred and attached as the "is_cased" attribute. The
+#'   vocabulary indices are taken to be the positions of the tokens, 
+#'   *starting at zero* for historical consistency.
 #'
 #'   Note that from the perspective of a neural net, the numeric indices *are*
 #'   the tokens, and the mapping from token to index is fixed. If we changed the
-#'   indexing, it would break any pre-trained models. This is why the vocabulary
-#'   is stored as a named integer vector, and why it starts with index zero.
+#'   indexing, it would break any pre-trained models using that vocabulary. 
 #'
 #' @export
 load_or_retrieve_vocab <- function(vocab_file) {
@@ -207,12 +203,12 @@ load_or_retrieve_lookup <- function(lookup_file) {
 #' be assumed to be uncased. Note that tokens like "\\[CLS\\]" contain uppercase
 #' letters, but don't start with uppercase letters.
 #'
-#' @param vocab The vocabulary as a named integer vector.
+#' @param vocab The vocabulary as a character vector.
 #' @return TRUE if the vocabulary is cased, FALSE if uncased.
 #'
 #' @keywords internal
 .infer_case_from_vocab <- function(vocab) {
-  is_cased <- any(grepl(pattern = "^[A-Z]", names(vocab)))
+  is_cased <- any(grepl(pattern = "^[A-Z]", vocab))
   return(is_cased)
 }
 
@@ -221,12 +217,12 @@ load_or_retrieve_lookup <- function(lookup_file) {
 
 #' Constructor for Class morphemepiece_vocabulary
 #'
-#' @param vocab Named integer vector; the "actual" vocabulary.
-#' @param vocab_split List of named integer vectors; the split vocabulary.
+#' @param vocab Character vector; the "actual" vocabulary.
+#' @param vocab_split List of character vectors; the split vocabulary.
 #' @param is_cased Logical; whether the vocabulary is cased.
 #' @return The vocabulary with `is_cased` attached as an attribute, and the
-#'   class `morphemepiece_vocabulary` applied. The split and reversed
-#'   vocabularies are also attached as attributes.
+#'   class `morphemepiece_vocabulary` applied. The split vocabulary is also
+#'   attached as an attribute.
 #'
 #' @keywords internal
 .new_morphemepiece_vocabulary <- function(vocab,
@@ -237,7 +233,7 @@ load_or_retrieve_lookup <- function(lookup_file) {
       vocab,
       "vocab_split" = vocab_split,
       "is_cased" = is_cased,
-      class = c("morphemepiece_vocabulary", "integer")
+      class = c("morphemepiece_vocabulary", "character")
     )
   )
 }
@@ -266,3 +262,54 @@ load_or_retrieve_lookup <- function(lookup_file) {
   }
   return(vocab)
 }
+
+
+# .process_vocab -----------------------------------------------------------
+
+
+#' Process a Morphemepiece Vocabulary for Tokenization
+#'
+#' @param v An object of class `morphemepiece_vocabulary`.
+#'
+#' @return A character vector of tokens for tokenization.
+#' @keywords internal
+.process_mp_vocab <- function(v) {
+  UseMethod(".process_mp_vocab", v)
+}
+
+#' @rdname dot-process_mp_vocab
+#' @keywords internal
+#' @export
+.process_mp_vocab.default <- function(v) {
+  stop("Unsupported vocabulary type. ",
+       "The vocabulary should be an object of type `morphemepiece_vocabulary`.",
+       " To use the default morphemepiece vocabulary, see ",
+       "`morphemepiece_vocabulary()`.")
+}
+
+#' @rdname dot-process_mp_vocab
+#' @keywords internal
+#' @export
+.process_mp_vocab.morphemepiece_vocabulary <- function(v) {
+  NextMethod()
+}
+
+#' @rdname dot-process_mp_vocab
+#' @keywords internal
+#' @export
+.process_mp_vocab.integer <- function(v) {
+  # I don't know why `order`ing the vocab, even with memoisation, is so much
+  # slower than it was with wordpiece. But for now, assume that an integer
+  # vocab is in order.
+  # return(names(v)[order(v)])
+  return(names(v))
+}
+
+#' @rdname dot-process_mp_vocab
+#' @keywords internal
+#' @export
+.process_mp_vocab.character <- function(v) {
+  return(v)
+}
+
+

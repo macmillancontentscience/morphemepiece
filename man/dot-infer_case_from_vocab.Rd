@@ -7,7 +7,7 @@
 .infer_case_from_vocab(vocab)
 }
 \arguments{
-\item{vocab}{The vocabulary as a named integer vector.}
+\item{vocab}{The vocabulary as a character vector.}
 }
 \value{
 TRUE if the vocabulary is cased, FALSE if uncased.
