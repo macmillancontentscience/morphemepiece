@@ -16,7 +16,7 @@
 \arguments{
 \item{word}{Word to tokenize.}
 
-\item{vocab_split}{List of character vector containing vocabulary words.
+\item{vocab_split}{List of character vectors containing vocabulary words.
 Should have components named "prefixes", "words", "suffixes".}
 
 \item{dir}{Integer; if 1 (the default), look for tokens starting at the

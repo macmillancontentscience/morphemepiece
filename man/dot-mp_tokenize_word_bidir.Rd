@@ -15,7 +15,7 @@
 \arguments{
 \item{word}{Character scalar; word to tokenize.}
 
-\item{vocab_split}{List of character vector containing vocabulary words.
+\item{vocab_split}{List of character vectors containing vocabulary words.
 Should have components named "prefixes", "words", "suffixes".}
 
 \item{unk_token}{Token to represent unknown words.}
