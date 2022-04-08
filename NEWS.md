@@ -1,3 +1,7 @@
+# morphemepiece 1.2.1
+
+* Implemented various speed improvements.
+
 # morphemepiece 1.1.1
 
 * Blank strings ("") now return integer(0) instead of the unknown token.
