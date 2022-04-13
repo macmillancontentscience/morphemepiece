@@ -71,14 +71,7 @@ test_that("lookup words tokenize as expected.", {
   test_result <- morphemepiece_tokenize("chairball")
   # Manually construct the expected result from the vocab.
   expected_result <- list(
-    stats::setNames(
-      c(
-        which(morphemepiece_vocab() == "chair") - 1L,
-        which(morphemepiece_vocab() == "##") - 1L,
-        which(morphemepiece_vocab() == "ball") - 1L
-      ),
-      c("chair", "##", "ball")
-    )
+    c(chair = 4514L, `##` = 3024L, ball = 4731L)
   )
   testthat::expect_identical(test_result, expected_result)
 
@@ -90,15 +83,7 @@ test_that("lookup words tokenize as expected.", {
   # Find a word that tests the backwards run of the fall-through...
   test_result <- morphemepiece_tokenize("unarcher")
   # Manually construct the expected result from the vocab.
-  expected_result <- list(
-    stats::setNames(
-      c(
-        which(morphemepiece_vocab() == "un##") - 1L,
-        which(morphemepiece_vocab() == "archer") - 1L
-      ),
-      c("un##", "archer")
-    )
-  )
+  expected_result <- list(c(`un##` = 11995L, archer = 4487L))
   testthat::expect_identical(test_result, expected_result)
 })
 
@@ -110,17 +95,10 @@ test_that("Corner cases are handled properly.", {
   expect_identical(test_result, expected_result)
 
   test_result <- morphemepiece_tokenize(text = c("two word", "", "that"))
-
   expected_result <- list(
-    stats::setNames(
-      c(which(vocab == "two") - 1L, which(vocab == "word")  - 1L),
-      c("two", "word")
-    ),
-    stats::setNames(integer(0), character(0)),
-    stats::setNames(
-      which(vocab == "that") - 1L,
-      "that"
-    )
+    c(two = 3086L, word = 7256L),
+    structure(integer(0), .Names = character(0)),
+    c(that = 12511L)
   )
   expect_identical(test_result, expected_result)
 })
