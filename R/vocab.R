@@ -302,7 +302,7 @@ load_or_retrieve_lookup <- function(lookup_file) {
   # slower than it was with wordpiece. But for now, assume that an integer
   # vocab is in order.
   # return(names(v)[order(v)])
-  return(names(v))
+  return(names(v)) # nocov
 }
 
 #' @rdname dot-process_mp_vocab

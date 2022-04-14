@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-test_that("lookup words tokenize as expected.", {
+test_that("various words tokenize as expected.", {
   # I don't want to have to deal with file paths, so we generate and then kill
   # the vocab and lookup. Ideally this should happen overall for the test suite.
   letter_pairs <- paste0("##", as.vector(outer(letters, letters, FUN = paste0)))
@@ -29,6 +29,13 @@ test_that("lookup words tokenize as expected.", {
     "fox",
     "run",
     "##ing",
+    "chair",
+    "ball",
+    "archer",
+    "two",
+    "word",
+    "that",
+    "una",
     letters,
     paste0("##", letters),
     letter_pairs
@@ -60,45 +67,52 @@ test_that("lookup words tokenize as expected.", {
   )
   expected_result <- list(
     c(
-      `un##` = 3L, affable = 4L, `un##` = 3L, able = 5L, fox = 7L, `##s` = 54L,
+      `un##` = 3L, affable = 4L, `un##` = 3L, able = 5L, fox = 7L, `##s` = 61L,
       run = 8L, `##ing` = 9L, `.` = 1L
     ),
-    c(affable = 4L, able = 5L, fox = 7L, run = 8L, `##s` = 54L)
+    c(affable = 4L, able = 5L, fox = 7L, run = 8L, `##s` = 61L)
   )
   testthat::expect_identical(test_result, expected_result)
 
-  # Can also test using the imported morphemepiece.data vocab + lookup
-  test_result <- morphemepiece_tokenize("chairball")
-  # Manually construct the expected result from the vocab.
+  # Continue to use the small test vocab here.
+  test_result <- morphemepiece_tokenize("chairball", 
+                                        vocab = vocab, 
+                                        lookup = lookup)
   expected_result <- list(
-    c(chair = 4514L, `##` = 3024L, ball = 4731L)
+    c(chair = 10L, `##` = 2L, ball = 11L)
   )
   testthat::expect_identical(test_result, expected_result)
 
   # test max_chars
-  test_result <- morphemepiece_tokenize("longfakewordxzz", max_chars = 7L)
-  expected_result <- list(c(`[UNK]` = 1L))
+  test_result <- morphemepiece_tokenize("longfakewordxzz",
+                                        vocab = vocab,
+                                        lookup = lookup,
+                                        max_chars = 7L)
+  expected_result <- list(c(`[UNK]` = 0L))
   testthat::expect_identical(test_result, expected_result)
 
   # Find a word that tests the backwards run of the fall-through...
-  test_result <- morphemepiece_tokenize("unarcher")
-  # Manually construct the expected result from the vocab.
-  expected_result <- list(c(`un##` = 11995L, archer = 4487L))
+  test_result <- morphemepiece_tokenize("unarcher",
+                                        vocab = vocab,
+                                        lookup = lookup)
+  expected_result <- list(c(`un##` = 3L, archer = 12L))
+  testthat::expect_identical(test_result, expected_result)
+  
+  # check the empty string corner case
+  test_result <- morphemepiece_tokenize(text = "",
+                                        vocab = vocab,
+                                        lookup = lookup)
+  expected_result <- list(structure(integer(0), .Names = character(0)))
+  testthat::expect_identical(test_result, expected_result)
+  
+  test_result <- morphemepiece_tokenize(text = c("two word", "", "that"),
+                                        vocab = vocab,
+                                        lookup = lookup)
+  expected_result <- list(
+    c(two = 13L, word = 14L),
+    structure(integer(0), .Names = character(0)),
+    c(that = 15L)
+  )
   testthat::expect_identical(test_result, expected_result)
 })
 
-test_that("Corner cases are handled properly.", {
-  vocab <- morphemepiece_vocab()
-
-  test_result <- morphemepiece_tokenize(text = "")
-  expected_result <- list(structure(integer(0), .Names = character(0)))
-  expect_identical(test_result, expected_result)
-
-  test_result <- morphemepiece_tokenize(text = c("two word", "", "that"))
-  expected_result <- list(
-    c(two = 3086L, word = 7256L),
-    structure(integer(0), .Names = character(0)),
-    c(that = 12511L)
-  )
-  expect_identical(test_result, expected_result)
-})
