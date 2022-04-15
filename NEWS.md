@@ -1,3 +1,7 @@
+# morphemepiece 1.2.3
+
+* Update tests to be independent of morphemepiece.data version.
+
 # morphemepiece 1.2.1
 
 * Implemented various speed improvements.

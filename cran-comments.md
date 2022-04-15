@@ -1,6 +1,6 @@
-## v. 1.2.1 (Resubmission)
-* Submitting update 2022-04-08
-* Implemented significant speed improvements.
+## v. 1.2.3 (Resubmission)
+* Submitting update 2022-04-15
+* Updated tests.
 
 
 ## Test environments
